@@ -1,3 +1,4 @@
+#this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
 #read Bethany's csv of Short data (large fires only) + average monthly fuel moisture from 1992-2013 by fire event
 
 library(sp)

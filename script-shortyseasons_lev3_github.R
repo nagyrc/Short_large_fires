@@ -1,3 +1,4 @@
+#this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
 #FIRE SEASONALITY with Level 3 ecoregions...Level 1 ecoregions in separate R script (script-shortyseasons061516.R)
 #use updated Short data from Emily with ecoregions
 

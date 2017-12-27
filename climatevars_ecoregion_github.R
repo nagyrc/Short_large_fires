@@ -1,3 +1,4 @@
+#this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
 #skip to line 214 to re-open and plot
 #need to update masterord.csv with updated Short data
 #updated 11/3/16
