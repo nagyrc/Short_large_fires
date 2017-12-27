@@ -1,3 +1,4 @@
+#this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
 # This script is the first step in the WUI project. 
 # Here we import, project, intersect, organize data layers
 # Key layers are the Short ignitions, Radeloff WUI product, MTBS data
