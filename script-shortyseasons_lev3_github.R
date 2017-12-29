@@ -239,28 +239,27 @@ r5widebbdf<-as.data.frame(r5widebb)
 write.table(r5widebbdf, "/Users/rana7082/Desktop/firehasum_hvsl_ecn_wide.csv", sep=",", row.names=FALSE)
 
 #######
-#%human across all fires
-#will use this to make updated version of Figure 1. updated 11/10/16
-#join to ecoregion layer to display % human
-head(subz)
+#number of human vs. lightning caused fires by ecoregion of fires of all sizes
+
 r6 <- summaryBy(OBJECTID~ig+ecn, data=subz, FUN=length)
-#Error in nobs.default(x, ...) : no 'nobs' method is available
-r6
 
+#transform to wide
 r6wide<-spread(r6,ig,OBJECTID.length)
-head(r6wide)
 
+#calculate the total number of fires (all ignitions)
 r6wide$tot<-r6wide$human+r6wide$lightning
+
+#calculate the percent of human started fires
 r6wide$perh<-r6wide$human/r6wide$tot*100
 
-head(r6wide)
-
+#order by decreasing percent human fires
 r7<-r6wide[order(r6wide$perh),]
-r7
+#range across ecn's is from 16-99% human
 
+#output table
 write.table(r7, "/Users/rana7082/Dropbox/ecoregions/derived/perh_ecn_Short_update.csv", sep=",", row.names=FALSE)
 
-#range across ecn's is from 16-99% human
+
 ##############################################
 
 
@@ -269,10 +268,7 @@ write.table(r7, "/Users/rana7082/Dropbox/ecoregions/derived/perh_ecn_Short_updat
 #################################
 #to understand what a large fire is in each ecoregion
 #extract top 10% of largest fires from each ecoregion
-
-
 #then put back into a dataframe that has all columns
-#can change this to 0.95 to get the 5% largest fires per ecn
 outputy=NULL
 for (i in tt3) {
   subby<-subz[subz$ecn==i,]
@@ -280,33 +276,25 @@ for (i in tt3) {
   outputy<-rbind(outputy,data.frame(ninety[,]))
 }
 
+#output table of large fires
 write.table(outputy, "/Users/rana7082/Dropbox/ecoregions/derived/Short_large10.csv", sep=",", row.names=FALSE)
 
 
-head(outputy)
-tail(outputy)
+#what is max fire size of large fires?
 summary(outputy$ha)
 #max=225900 ha
 #use this as max for x axis and determining bin width
 
-#now can use this dataframe for further analyses
 
 
-
-#look at histogram across all ecns
-library(ggplot2)
+#look at histogram of fire sizes across all ecns
 ggplot(data=outputy, aes(outputy$ha)) + 
   geom_histogram(binwidth=1000) 
-
-#######################
-#need to split out by ignitions? if so, see code below
-barplot(r2m, beside=T, horiz=F, legend=T, col=c("red", "blue"), 
-        main = eco.desc, xlab = "Day of year in Julian Day", ylab = "Number of Fires", 
-        border=c("red","blue"), cex.names=1.25, cex.axis=1.25, cex.lab=1.25)
+#many relatively small 'large' fires
 
 
 #######################
-#look at ind. ecn histograms to make sure they look reasonable
+#individual ecoregion histograms of fire size by human and lightning ignitions
 hpy <- list()
 
 for (i in tt3) {
@@ -318,16 +306,12 @@ for (i in tt3) {
   
 }
 
-#test by printing one
+#example ecoregion
 hpy[821]
-#I think it's working- compare these to the whole dataset, seems to have shifted
 
 
 
-#create dataframe of nobs, mean, sd of fire size from each ecoregion
-
-head(subz)
-
+#create dataframe of number of fires, mean, sd of fire size by ecoregion
 output=NULL
 
 for (i in tt3) {
@@ -337,32 +321,24 @@ for (i in tt3) {
   output<-rbind(output,outty)
 }
 
-head(output)
-
 colnames(output) <- c("ecn", "nobs", "mean","sd","median","sum")
 row.names(output)<-NULL
 output
 
-tt9<-unique(subz[c("ecn", "NA_L3CODE")])
-library(dplyr)
-head(tt9)
+#add key to this dataframe
 fff<-merge(output,tt9,by="ecn")
 head(fff)
 
+#output table; used to make Table S1
 write.table(fff, "/Users/rana7082/Dropbox/ecoregions/derived/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE)
-#updated 11/3/16 with new Short data; updated 11/21/16 with medians
-#use this to remake Figure 2
 
 
 
-#calculate % human by ecn for just top 10% largest fires
-#use this to remake Figure 2 or to make alternative version of Figure 3
-#this isn't working with updated Short data.
-#need subz$ig info in here. no ig info in output
-head(output)
-
+#calculate % human by ecoregion for just top 10% largest fires
+#use this to make Figure 1 
 
 #run on each subset (human and lightning)
+#human subset of large fires only
 outputh=NULL
 
 for (i in tt3) {
@@ -373,10 +349,10 @@ for (i in tt3) {
   outputh<-rbind(outputh,outtyh)
 }
 
-head(outputh)
 colnames(outputh) <- c("ecn", "hnobs", "hmean","hsd","hmedian","hsum")
 row.names(outputh)<-NULL
 
+#lightning subset of large fires only
 outputl=NULL
 
 for (i in tt3) {
@@ -387,63 +363,36 @@ for (i in tt3) {
   outputl<-rbind(outputl,outtyl)
 }
 
-head(outputl)
 colnames(outputl) <- c("ecn", "lnobs", "lmean","lsd","lmedian","lsum")
 row.names(outputl)<-NULL
 
-outputl
 
 #merge two dataframes together
 output2<-merge(outputh,outputl,by="ecn")
-head(output2)
-output2
 
+#calculate the total number of fires of all ignitions
 output2$totfires<-output2$hnobs+output2$lnobs
-output2$perh<-output2$hnobs/output2$totfires*100
 
+#calculate the percent of human ignitions by ecoregion
+output2$perh<-output2$hnobs/output2$totfires*100
 
 #put back in NA_L3CODE to join easily in Arc
 tt9<-unique(subz[c("ecn", "NA_L3CODE")])
-library(dplyr)
 jjj<-left_join(output2,tt9,by="ecn")
-head(jjj)
+
+#output table; used to make Figure 1
 write.table(jjj, "/Users/rana7082/Dropbox/ecoregions/derived/firehasum_ecn_top_ten_Short_update_hl.csv", sep=",", row.names=FALSE)
 
-jjj
+#what is range of percent human started fires by ecoregion?
 summary(jjj$perh)
 #min=15.76, 6.2.15, Idaho Batholith
 #max=99.58, 11.1.2, Central CA Valley
 
 
-#do not need next 20 lines below???
-###
-library(doBy)
-r6b <- summaryBy(OBJECTID~ig+ecn, data=output, FUN=nobs)
-r6b
-
-library(tidyr)
-r6wideb<-spread(r6b,ig,oid.nobs)
-head(r6wideb)
-
-#replace NA's here with zeros
-r6wideb[is.na(r6wideb)]<-0
-
-r6wideb$tot<-r6wideb$human+r6wideb$lightning
-r6wideb$perh<-r6wideb$human/r6wideb$tot*100
-
-head(r6wideb)
-
-r7b<-r6wideb[order(r6wideb$perh),]
-r7b
-
-write.table(r7b, "/Users/rana7082/Desktop/perh_ecn_top_ten.csv", sep=",", row.names=FALSE)
-
-
-
-
+################################################
 ##############################
-#fire season for top 10% of fires only by ecoregion
-#histograms with fire frequency by day of year, top 10% only
+#fire season for large fires only by ecoregion
+#histograms with fire frequency by Julian day of year, large fires only
 output=NULL
 
 for (i in tt3) {
@@ -452,8 +401,6 @@ for (i in tt3) {
   outty<-ninety[,]
   output<-rbind(output,outty)
 }
-
-head(output)
 
 eco.legend <- data.frame(ec = unique(output$NA_L3CODE), ed = unique(output$NA_L3NAME))
 eco.legend$ec2<-as.character(eco.legend$ec)
