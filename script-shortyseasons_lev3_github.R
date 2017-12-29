@@ -390,24 +390,31 @@ summary(jjj$perh)
 
 
 ################################################
+# fire season, large fires, all ecoregions
+#cannot use 'output' from above because this one keeps different columns... this one also takes longer to run
+output2=NULL
 
+for(i in tt3) {
+  subby<-subz[subz$ecn==i,]
+  ninety<-subset(subby, ha >= quantile(ha, 0.9))
+  outty<-ninety[,]
+  output2<-rbind(output2,outty)
+}
 
+eco.legend <- data.frame(ec = unique(output2$NA_L3CODE), ed = unique(output2$NA_L3NAME))
+eco.legend$ec2<-as.character(eco.legend$ec)
+eco.legend$ec3<-gsub("\\.", "", (eco.legend$ec2))
+eco.legend$ecn<-as.numeric(eco.legend$ec3)
+eco.legend <- subset(eco.legend, eco.legend$ecn != 000 & is.na(eco.legend$ecn) == FALSE)
+eco.legend <- eco.legend[order(eco.legend$ecn),]
 
-
-head(output)
-r3 <- summaryBy(OBJECTID~DISCOVERY1+ig, data=output, FUN=nobs)
-r3
-#tt<-as.numeric(unique(r3$ecn))
-
+r3 <- summaryBy(OBJECTID~DISCOVERY1+ig, data=output2, FUN=length)
 
 # fire season, large fires, all ecoregions
-wide <- reshape(r3,v.names="OBJECTID.nobs", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
+wide <- reshape(r3,v.names="OBJECTID.length", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
 wide[is.na(wide)] <- 0
 
-head(wide)
-
 w <- wide[,2:length(wide)]
-head(w)
 colnames(wide) <- c("ig", substr(colnames(w), 11, 13))
 colnames(wide) <- c("ig", substr(colnames(w), 11, 13))
 
@@ -415,28 +422,35 @@ r2m <- as.matrix(wide[,2:length(wide)])
 rownames(r2m) <- wide[,1]
 colnames(r2m)<-c(1:366)
 
-head(r2m)
-
+#plot
 barplot(r2m, beside=T, horiz=F, legend=T, col=c("red", "blue"), 
         xlab = "Day of year in Julian Day", ylab = "Number of Fires", 
         border=c("red","blue"), cex.names=1.25, cex.axis=1.25, cex.lab=1.25,ylim=c(0,1200))
+#this looks pretty funky, but is fine when you zoom in 
 
 #check to make sure correct # obs
 yyy<-rowSums(r2m[,])
 head(yyy)
-129968+30640
-#160608
-
-r4 <- summaryBy(DISCOVERY1~ig, data=output, FUN=median)
+130346+30641
+#160987, but should be 160608
+################################################
+#this is reported in manuscript, so need to keep output2 from above?  code with 'output' doesn't work here
+r4 <- summaryBy(DISCOVERY1~ig, data=output2, FUN=median)
 r4
 #median doy for human fires = 118, median doy for lightning fires = 204
 
-r4.1<-summaryBy(DISCOVERY1~ig+NA_L3CODE, data=output, FUN=median)
+r4b <- summaryBy(DISCOVERY1~ig, data=output, FUN=median)
+#Error in eval(parse(text = x), data) : numeric 'envir' arg not of length one
+
+r4.1<-summaryBy(DISCOVERY1~ig+NA_L3CODE, data=output2, FUN=median)
 r4.1
 
+#output table
 write.table(r4.1, "C:/Users/rnagy/Dropbox/ecoregions/derived/meddoyhl.csv", sep=",", row.names=FALSE)
+################################################
 
 
+#stats about what is human fire vs. lightning large fire season
 hsub<-subset(output,output$ig=="human")
 lsub<-subset(output,output$ig=="lightning")
 
@@ -465,12 +479,12 @@ head(out)
 r66 <- summaryBy(OBJECTID~NA_L3CODE, data=out, FUN=nobs)
 r66
 
-
+#output table
 write.table(r66, "C:/Users/rnagy/Dropbox/ecoregions/derived/non_light_season.csv", sep=",", row.names=FALSE)
 
 
-
-#split into east and west US; figure 4a; figure 4b
+#########################################
+#split into east and west US; Figure 3a; Figure 3b
 setwd("/Users/rana7082/Dropbox/ecoregions/derived/")
 setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
 regiontab<-read.csv("arc_map_regions.csv")
@@ -479,7 +493,6 @@ region<-as.data.frame(regiontab)
 head(region)
 head(output)
 
-library(dplyr)
 outputrr<-left_join(output,region,by="NA_L3CODE")
 head(outputrr)
 
@@ -514,7 +527,7 @@ r3west <- subset(r3, r3$region == "west")
 
 
 #east
-# fire season, large fires, all ecoregions, Figure 4a in manuscript
+# fire season, large fires, all ecoregions, Figure 3a in manuscript
 head(r3east)
 
 r3east <- subset(r3east, select = -c(region) )
@@ -575,7 +588,6 @@ region<-as.data.frame(regiontab)
 head(region)
 head(output)
 
-library(dplyr)
 outputrr<-left_join(output,region,by="NA_L3CODE")
 head(outputrr)
 
@@ -620,7 +632,6 @@ region<-as.data.frame(regiontab)
 head(region)
 head(output)
 
-library(dplyr)
 outputrr<-left_join(output,region,by="NA_L3CODE")
 head(outputrr)
 
