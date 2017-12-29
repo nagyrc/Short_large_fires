@@ -1,6 +1,6 @@
 #this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
 #FIRE SEASONALITY with Level 3 ecoregions...Level 1 ecoregions in separate R script (script-shortyseasons061516.R)
-#use updated Short data from Emily with ecoregions
+#use updated Short data from preprocessing
 
 library(doBy)
 library(gdata)
@@ -35,15 +35,10 @@ eco.legend <- data.frame(ec = unique(slim$NA_L3CODE), ed = unique(slim$NA_L3NAME
 head(eco.legend)
 str(eco.legend)
 
-#NA_L3CODE is a factor (e.g. 10.1.2)- how to convert this to numeric?
+#change the format of the legend in a not so elegant fashion
 eco.legend$ec2<-as.character(eco.legend$ec)
-
 eco.legend$ec3<-gsub("\\.", "", (eco.legend$ec2))
-
-
 eco.legend$ecn<-as.numeric(eco.legend$ec3)
-
-
 eco.legend <- subset(eco.legend, eco.legend$ecn != 000 & is.na(eco.legend$ecn) == FALSE)
 eco.legend <- eco.legend[order(eco.legend$ecn),]
 
@@ -55,13 +50,7 @@ head(slim)
 
 slim$ecn<-as.character(gsub("\\.","",slim$NA_L3CODE))
 slim$ecn<-as.numeric(slim$ecn)
-#
-head(slim)
-library(doBy)
 
-
-#r2 <- summaryBy(OBJECTID~DISCOVERY1+ig+ecn, data=slim, FUN=nobs)
-#Error in nobs.default(x, ...) : no 'nobs' method is available
 r2 <- summaryBy(OBJECTID~DISCOVERY1+ig+ecn, data=slim, FUN=length)
 r2 <- subset(r2, r2$ecn != 000)
 r2 <- subset(r2, is.na(r2$ecn) == FALSE)
@@ -71,21 +60,8 @@ head(r2)
 unique(r2$ecn)
 table(r2$DISCOVERY1)
 
-#order r2 by DISCOVERY1
-
-#R<- dd[with(dd, order(-z, b)), ]
-#R<- r2[with(r2, order(ecn,DISCOVERY1)), ]
-
-#head(R)
-
+#plots of number of fires (human and lightning) by Julian day per ecoregion
 tt<-as.numeric(unique(r2$ecn))
-tt
-# plots by indv. ecoregions
-
-
-###
-#this works 11/4/16
-head(r2)
 
 for (i in tt) {
   
@@ -124,7 +100,7 @@ for (i in tt) {
 }
 
 ########
-#examples
+#example ecoregion plots
 tt2<-c(6215,1112)  
 for (i in tt2) {
   
@@ -147,44 +123,35 @@ for (i in tt2) {
 }
 
 #######
-#Yay!!!!
-
 #END (unless needed on same scale or log scale, then change ec to ecn in below)
 
 
 #######################################################
 
-#plots by indv. ecoregions of fire size binned in categories
-#######################################
+#plots by indv. ecoregions of fire size binned in categories for human vs. lightning fires
 
-
-#add to slim
-slim$ecn<-as.character(gsub("\\.","",slim$NA_L3CODE))
-slim$ecn<-as.numeric(slim$ecn)
-
-
+#subset out water fires
 subz <- subset(slim, slim$ecn != 000)
 subz <- subset(slim, slim$ecn != 0)
 subz <- subset(subz, is.na(subz$ecn) == FALSE)
 
 head(subz)
 tail(subz)
-head(subzz)
 
 tt3<-unique(subz$ecn)
-tt3
 
 is.numeric (tt3)
 
-
+###
+#to make a key of ecoregion names and numbers
 tt7<-unique(subz[c("ecn", "NA_L3NAME")])
-tt7
 
 #write table to interpret the ecn numbers
 write.table(tt7, "/Users/rana7082/Desktop/ecn_Lev3_key.csv", sep=",", row.names=FALSE)
+###
 
-####################################
-#this works; use this
+###
+#to make plots
 hp <- list()
 
 for (i in tt3) {
@@ -196,11 +163,11 @@ for (i in tt3) {
   
 }
 
-#test by printing one
+#print one example
 hp[821]
 
 
-#####Yayyyyy!!!!!!
+#############################
 
 #summary stats
 r3ccc <- summaryBy(ha~ecn, data=subz, FUN=c(length,mean,sd,median,sum))
