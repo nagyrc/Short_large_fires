@@ -6,6 +6,7 @@ library(doBy)
 library(gdata)
 library(ggplot2)
 library(tidyr)
+library(dplyr)
 
 #updated Short data and joined with ecoregion data
 
@@ -169,58 +170,57 @@ hp[821]
 
 #############################
 
-#summary stats
+#summary stats of number of fires, mean fire size, median fire size, total burned area for each ecoregion
 r3ccc <- summaryBy(ha~ecn, data=subz, FUN=c(length,mean,sd,median,sum))
 r3ccc$ha.se<-r3ccc$ha.sd/sqrt(r3ccc$ha.length)
-#r3ccc$ha.mean2sd<-r3ccc$ha.mean+(2*r3ccc$ha.sd)
-r3ccc
 
+#make into a dataframe
 r3cccb<-as.data.frame(r3ccc)
 head(r3cccb)
 
-#order by mean ha
+#order dataframe by mean fire size (ha)
 r3d<-r3cccb[order(r3cccb$ha.mean),]
+
+#output table
 write.table(r3d, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_ecn.csv", sep=",", row.names=FALSE)
 
-#order by sum ha
+#order dataframe by sum of burned area (ha)
 r3e<-r3cccb[order(r3cccb$ha.sum),]
+
+#output table
 write.table(r3e, "/Users/rana7082/Dropbox/ecoregions/derived/firehasum_ecn.csv", sep=",", row.names=FALSE)
 
-tt9<-unique(subz[c("ecn", "NA_L3CODE")])
 
-#add in code for easy joining in Arc
-library(dplyr)
+#add in code to dataframe for easy joining in Arc
+tt9<-unique(subz[c("ecn", "NA_L3CODE")])
 hhh<-left_join(r3d,tt9,by="ecn")
 
-head(hhh)
+#output table
 write.table(hhh, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_ecn.csv", sep=",", row.names=FALSE)
 
 #################################
-#fire size by cause across all fires
+#summary stats of number of fires, mean fire size, median fire size, total burned area by ecoregion and ignition source
 r4 <- summaryBy(ha~ig+ecn, data=subz, FUN=c(length,mean,sd,median,sum))
 r4$ha.se<-r4$ha.sd/sqrt(r4$ha.length)
-#r4$ha.mean2sd<-r4$ha.mean+(2*r4$ha.sd)
-r4
 
+#make into dataframe
 r4b<-as.data.frame(r4)
-head(r4b)
+
+#output table
 write.table(r4b, "/Users/rana7082/Desktop/fireha_hvsl_ecn.csv", sep=",", row.names=FALSE)
 
 #order by mean fire size
 r5<-r4b[order(r4b$ha.mean),]
-r5
-head(r5)
-#biggest are lightning fires
-#ask Bethany for help here
 
+#order by sum of burned area
 r5bb<-r4b[order(r4b$ha.sum),]
-r5bb
 
-
+#transpose table into wide format
 r5wide<-r5[,c("ig","ecn","ha.mean")]
 r5wide<-spread(r5wide,ig,ha.mean)
 head(r5wide)
 
+#scatterplot of mean fire size of human vs. lightning by ecoregion
 plot(r5wide$human,r5wide$lightning)
 #within an ecoregion, as the human fires get bigger, lightning fires tend to get bigger
 
@@ -229,9 +229,13 @@ r5widebb<-r5bb[,c("ig","ecn","ha.sum")]
 r5widebb<-spread(r5widebb,ig,ha.sum)
 head(r5widebb)
 
+#scatterplot of sum of burned area of human vs. lightning by ecoregion
 plot(r5widebb$human,r5widebb$lightning)
 
+#convert to dataframe
 r5widebbdf<-as.data.frame(r5widebb)
+
+#output table
 write.table(r5widebbdf, "/Users/rana7082/Desktop/firehasum_hvsl_ecn_wide.csv", sep=",", row.names=FALSE)
 
 #######
