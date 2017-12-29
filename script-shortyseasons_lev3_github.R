@@ -393,55 +393,31 @@ summary(jjj$perh)
 ##############################
 #fire season for large fires only by ecoregion
 #histograms with fire frequency by Julian day of year, large fires only
-output=NULL
+#cannot use 'output' from above...not sure why
+soutput=NULL
 
-for (i in tt3) {
+for(i in tt3) {
   subby<-slim[slim$ecn==i,]
   ninety<-subset(subby, ha >= quantile(ha, 0.9))
   outty<-ninety[,]
-  output<-rbind(output,outty)
+  soutput<-rbind(soutput,outty)
 }
 
-eco.legend <- data.frame(ec = unique(output$NA_L3CODE), ed = unique(output$NA_L3NAME))
+eco.legend <- data.frame(ec = unique(soutput$NA_L3CODE), ed = unique(soutput$NA_L3NAME))
 eco.legend$ec2<-as.character(eco.legend$ec)
 eco.legend$ec3<-gsub("\\.", "", (eco.legend$ec2))
 eco.legend$ecn<-as.numeric(eco.legend$ec3)
-
-eco.legend
-
 eco.legend <- subset(eco.legend, eco.legend$ecn != 000 & is.na(eco.legend$ecn) == FALSE)
 eco.legend <- eco.legend[order(eco.legend$ecn),]
 
 ###################
-rr<-summaryBy(OBJECTID~ecn,data=output,FUN=nobs)
-rr
-
-summary(rr$OBJECTID.nobs)
-#min=31, max=23140
-sum(rr$OBJECTID.nobs<100)
-
-
-
-rr2<-summaryBy(OBJECTID~ecn+ig,data=output,FUN=nobs)
-rr2
-
-84*2
-
-#
-r2 <- summaryBy(OBJECTID~DISCOVERY1+ig+ecn, data=output, FUN=nobs)
-r2 <- subset(r2, r2$ecn != "000")
-r2 <- subset(r2, is.na(r2$ecn) == FALSE)
-
-head(r2)
-
+r2 <- summaryBy(OBJECTID~DISCOVERY1+ig+ecn, data=soutput, FUN=length)
 tt<-as.numeric(unique(r2$ecn))
-
-head(r2)
 
 # plots by indv. ecoregions
 for (i in tt) {
   
-  wide <- reshape(r2[r2$ecn == i,], v.names="OBJECTID.nobs", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
+  wide <- reshape(r2[r2$ecn == i,], v.names="OBJECTID.length", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
   wide[is.na(wide)] <- 0
   
   w <- wide[,3:length(wide)]
@@ -460,12 +436,12 @@ for (i in tt) {
           border=c("red","blue"), cex.names=1.25, cex.axis=1.25, cex.lab=1.25)
 }
 
-#attempt to standardize x axis by filling in new matrix
-#no idea why I have to set the x lim to 1000 to get the whole record to display
+#standardize x axis by filling in new matrix
+#need to set the x lim to 1000 to get the whole record to display
 #this is part of figure 4 (figure 4b (Central California Valley), figure 4c (Idaho Batholith))
 for (i in tt) {
   
-  wide <- reshape(r2[r2$ecn == i,], v.names="OBJECTID.nobs", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
+  wide <- reshape(r2[r2$ecn == i,], v.names="OBJECTID.length", idvar="ig", timevar="DISCOVERY1", direction="wide")  
   wide[is.na(wide)] <- 0
   
   w <- wide[,3:length(wide)]
