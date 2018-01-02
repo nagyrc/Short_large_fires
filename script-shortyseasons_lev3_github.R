@@ -7,6 +7,7 @@ library(gdata)
 library(ggplot2)
 library(tidyr)
 library(dplyr)
+library(tibble)
 
 #updated Short data and joined with ecoregion data
 
