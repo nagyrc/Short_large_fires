@@ -12,6 +12,7 @@ library(dplyr)
 
 setwd("/Users/rana7082/Dropbox/ecoregions/derived/")
 setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
+setwd("/Users/rana7082-su/Dropbox/ecoregions/derived/")
 
 #get updated Short data from: update_Short_dataset_102716.R
 slimtab <- read.csv("updatedShort_w_eco_slim3.csv")
