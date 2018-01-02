@@ -312,7 +312,11 @@ hpy[821]
 
 
 
-#create dataframe of number of fires, mean, sd of fire size by ecoregion
+
+
+################################
+#top 10% largest fires; summary statistics
+#create dataframe of number of fires, mean, sd of fire size by ecoregion (summary columns of the 10% largest fires)
 output=NULL
 
 for (i in tt3) {
@@ -321,6 +325,8 @@ for (i in tt3) {
   outty<- c(i,length(ninety$ha),mean(ninety$ha),sd(ninety$ha),median(ninety$ha),sum(ninety$ha))
   output<-rbind(output,outty)
 }
+
+###
 
 colnames(output) <- c("ecn", "nobs", "mean","sd","median","sum")
 row.names(output)<-NULL
@@ -332,6 +338,12 @@ head(fff)
 
 #output table; used to make Table S1
 write.table(fff, "/Users/rana7082/Dropbox/ecoregions/derived/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE)
+
+
+
+
+
+
 
 
 
@@ -392,24 +404,24 @@ summary(jjj$perh)
 
 ################################################
 # fire season, large fires, all ecoregions
-#cannot use 'output' from above because this one keeps different columns... this one also takes longer to run
-output2=NULL
+#cannot use 'output' from above because this one keeps different columns (summary columns)... this one also takes longer to run
+output3=NULL
 
 for(i in tt3) {
   subby<-subz[subz$ecn==i,]
   ninety<-subset(subby, ha >= quantile(ha, 0.9))
   outty<-ninety[,]
-  output2<-rbind(output2,outty)
+  output3<-rbind(output3,outty)
 }
 
-eco.legend <- data.frame(ec = unique(output2$NA_L3CODE), ed = unique(output2$NA_L3NAME))
+eco.legend <- data.frame(ec = unique(output3$NA_L3CODE), ed = unique(output3$NA_L3NAME))
 eco.legend$ec2<-as.character(eco.legend$ec)
 eco.legend$ec3<-gsub("\\.", "", (eco.legend$ec2))
 eco.legend$ecn<-as.numeric(eco.legend$ec3)
 eco.legend <- subset(eco.legend, eco.legend$ecn != 000 & is.na(eco.legend$ecn) == FALSE)
 eco.legend <- eco.legend[order(eco.legend$ecn),]
 
-r3 <- summaryBy(OBJECTID~DISCOVERY1+ig, data=output2, FUN=length)
+r3 <- summaryBy(OBJECTID~DISCOVERY1+ig, data=output3, FUN=length)
 
 # fire season, large fires, all ecoregions
 wide <- reshape(r3,v.names="OBJECTID.length", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
@@ -435,16 +447,15 @@ head(yyy)
 130346+30641
 #160987, but should be 160608
 ################################################
-#this is reported in manuscript, so need to keep output2 from above?  code with 'output' doesn't work here
-r4 <- summaryBy(DISCOVERY1~ig, data=output2, FUN=median)
+#median day of year for large human and lightning fires
+r4 <- summaryBy(DISCOVERY1~ig, data=output3, FUN=median)
 r4
 #median doy for human fires = 118, median doy for lightning fires = 204
 
-r4b <- summaryBy(DISCOVERY1~ig, data=output, FUN=median)
-#Error in eval(parse(text = x), data) : numeric 'envir' arg not of length one
 
-r4.1<-summaryBy(DISCOVERY1~ig+NA_L3CODE, data=output2, FUN=median)
+r4.1<-summaryBy(DISCOVERY1~ig+NA_L3CODE, data=output3, FUN=median)
 r4.1
+#this gives the median day of year for human and lightning by ecoregion
 
 #output table
 write.table(r4.1, "C:/Users/rnagy/Dropbox/ecoregions/derived/meddoyhl.csv", sep=",", row.names=FALSE)
@@ -452,8 +463,8 @@ write.table(r4.1, "C:/Users/rnagy/Dropbox/ecoregions/derived/meddoyhl.csv", sep=
 
 
 #stats about what is human fire vs. lightning large fire season
-hsub<-subset(output,output$ig=="human")
-lsub<-subset(output,output$ig=="lightning")
+hsub<-subset(output3,output3$ig=="human")
+lsub<-subset(output3,output3$ig=="lightning")
 
 twofive<-quantile(hsub$DISCOVERY1, 0.25)
 twofive
@@ -472,11 +483,11 @@ j2.5<-quantile(lsub$DISCOVERY1, 0.025)
 j97.5<-quantile(lsub$DISCOVERY1, 0.975)
 #267
 
+#number of large human-caused fires outside of lightning fire season
 out<-hsub[ which(hsub$DISCOVERY1>267| hsub$DISCOVERY1 < 104), ]
-#74,704
+#74,704; this is reported in manuscript
 
-head(out)
-
+#number of human-caused large fires outside of lightning fire season by ecoregion
 r66 <- summaryBy(OBJECTID~NA_L3CODE, data=out, FUN=nobs)
 r66
 
@@ -488,13 +499,17 @@ write.table(r66, "C:/Users/rnagy/Dropbox/ecoregions/derived/non_light_season.csv
 #split into east and west US; Figure 3a; Figure 3b
 setwd("/Users/rana7082/Dropbox/ecoregions/derived/")
 setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
+setwd("/Users/rana7082-su/Dropbox/ecoregions/derived/")
 regiontab<-read.csv("arc_map_regions.csv")
 region<-as.data.frame(regiontab)
 
 head(region)
-head(output)
+head(output3)
 
-outputrr<-left_join(output,region,by="NA_L3CODE")
+str(region)
+str(output3)
+
+outputrr<-left_join(output3,region,by="NA_L3CODE")
 head(outputrr)
 
 rr<-summaryBy(OBJECTID~ig+region, data=outputrr, FUN=nobs)
@@ -581,26 +596,19 @@ barplot(r2m, beside=T, horiz=F, legend=T, col=c("red", "blue"),
 
 
 ##########
-#seasonal correlations for east and west (by region)
-setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
-regiontab<-read.csv("arc_map_regions.csv")
-region<-as.data.frame(regiontab)
-
-head(region)
-head(output)
-
-outputrr<-left_join(output,region,by="NA_L3CODE")
-head(outputrr)
-
+#seasonal correlations of large fires with fires of all sizes for east and west (by region); number of fires by Julian day of year
+#large fires only
 r3 <- summaryBy(OBJECTID~DISCOVERY1+region, data=outputrr, FUN=nobs)
 head(r3)
 
+#fires of all sizes
 subzrr<-left_join(subz,region,by="NA_L3CODE")
 head(subzrr)
 
 r4 <- summaryBy(OBJECTID~DISCOVERY1+region, data=subzrr, FUN=nobs)
 head(r4)
 
+#join the two dataframes
 lll<-merge(r3,r4, by=c("DISCOVERY1","region"))
 head(lll)
 lll
@@ -626,30 +634,24 @@ summary(lm(large~all, data=tempe))
 
 ######
 #seasonal correlations for east and west (by region); human ignitions only
-setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
-regiontab<-read.csv("arc_map_regions.csv")
-region<-as.data.frame(regiontab)
-
-head(region)
-head(output)
-
-outputrr<-left_join(output,region,by="NA_L3CODE")
-head(outputrr)
-
+#subset only large human-caused fires
 outputh<-outputrr[outputrr$ig=="human",]
 
+#large human-caused fires only
 r3 <- summaryBy(OBJECTID~DISCOVERY1+region, data=outputh, FUN=nobs)
 head(r3)
 
-
+#fires of all sizes
 subzrr<-left_join(subz,region,by="NA_L3CODE")
 head(subzrr)
 
+#subset for human-caused fires of all sizes only
 subzh<-subzrr[subzrr$ig=="human",]
 
 r4 <- summaryBy(OBJECTID~DISCOVERY1+region, data=subzh, FUN=nobs)
 head(r4)
 
+#join together
 lll<-merge(r3,r4, by=c("DISCOVERY1","region"))
 head(lll)
 lll
@@ -669,7 +671,7 @@ cor(tempe$large,tempe$all)
 #r=0.988
 summary(lm(large~all, data=tempe))
 #p<2e-16
-
+#these numbers are reported in the manuscript
 
 
 
