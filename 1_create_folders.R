@@ -3,15 +3,15 @@ x <- c("data.table", "tidyverse", "magrittr", "sf", "gridExtra", "rgdal", "raste
        "assertthat", "purrr", "httr", "rvest", "lubridate", "parallel", "sp", "RColorBrewer", "ggmap")
 lapply(x, library, character.only = TRUE, verbose = FALSE)
 
-source("src/functions/helper_functions.R")
-source("src/functions/make_grid.R")
+#source("src/functions/helper_functions.R")
+#source("src/functions/make_grid.R")
 
 # Raw data folders
 prefix <- "data"
 raw_prefix <- file.path(prefix, "raw")
 ecoregion_prefix <- file.path(raw_prefix, "us_eco_l3")
 fpa_prefix <- file.path(raw_prefix, "fpa-fod")
-conus_prefix <- file.path(raw_prefix, "conus")
+us_prefix <- file.path(raw_prefix, "conus")
 biomass_prefix <- file.path(raw_prefix, "NBCD_countrywide_biomass_mosaic")
 bps_prefix <- file.path(raw_prefix, "us_130bps")
 ws_prefix <- file.path(raw_prefix, "ws")
