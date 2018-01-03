@@ -1,7 +1,6 @@
 #this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
-# This script is the first step in the WUI project. 
 # Here we import, project, intersect, organize data layers
-# Key layers are the Short ignitions, Radeloff WUI product, MTBS data
+# Key layers are the Short ignitions, level 3 ecoregions
 
 # Libraries ---------------------------------------------------------------
 library(tidyverse)
@@ -14,115 +13,10 @@ library(ncdf4)
 library(doParallel)
 library(foreach) 
 
-# Helper functions --------------------------------------------------------
-classify_wui <-  function(x) {
-  # break out fires into small, med, large
-  # input: 
-  #   - x: vector of fire sizes
-  # output: 
-  #   - y: vector (same length) of classified fire sizes ----- Km2
-  as.factor(ifelse(x == "Low_Dens_Intermix", "WUI",
-                   ifelse(x == "Low_Dens_Interface", "WUI",
-                          ifelse(x == "Med_Dens_Intermix", "WUI",
-                                 ifelse(x == "Med_Dens_Interface", "WUI",
-                                        ifelse(x == "High_Dens_Interface", "WUI",
-                                               ifelse(x == "High_Dens_Intermix", "WUI",
-                                                      ifelse(x == "Very_Low_Dens_Veg", "VLD", 
-                                                             ifelse(x == "Uninhabited_Veg", "Wildlands",
-                                                                    ifelse(x == "Med_Dens_NoVeg", "Urban",
-                                                                           ifelse(x == "Low_Dens_NoVeg", "Urban",
-                                                                                  ifelse(x == "High_Dens_NoVeg", "Urban",
-                                                                                         "Other"))))))))))))
-}
-
-netcdf_import <- function(file) {
-  file_split <- file %>%
-    basename %>%
-    strsplit(split = "_") %>%
-    unlist
-  var <- file_split[1]
-  year <- substr(file_split[2], start = 1, stop = 4)
-  
-  start_date <- as.Date(paste(year, "01", "01", sep = "-"))
-  end_date <- as.Date(paste(year, "12", "31", sep = "-"))
-  date_seq <- seq(start_date, end_date, by = "1 day") %m+% years(1)
-  
-  nc <- nc_open(tmp_dl[1])
-  nc_att <- attributes(nc$var)$names
-  ncvar <- ncvar_get(nc, nc_att)
-  rm(nc)
-  proj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-  rbrck <- brick(ncvar, crs= proj)
-  rm(ncvar)
-  extent(rbrck) <- c(-124.793, -67.043, 25.04186, 49.41686)
-  names(rbrck) <- paste(var, unique(date_seq),
-                        sep = "-")
-  return(rbrck)
-}      
-
-step1 <- function(x, mask, fun.a) {
-  file_split <- x %>%
-    basename %>%
-    strsplit(split = "_") %>%
-    unlist
-  var <- file_split[1]
-  year <- substr(file_split[2], start = 1, stop = 4)
-  
-  # if (as.numeric(year) < 1992) {
-  #   return("Year outside range of consideration")
-  # }
-  # 
-  # if (as.numeric(year) > 2015) {
-  #   return("Year outside range of consideration")
-  # }
-  
-  start_date <- as.Date(paste(year, "01", "01", sep = "-"))
-  end_date <- as.Date(paste(year, "12", "31", sep = "-"))
-  date_seq <- seq(start_date, end_date, by = "1 day") %m+% years(1)
-  monthly_seq <- seq(start_date, end_date, by = "1 month")
-  
-  proj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-  rbrck <- brick(x, crs= proj)
-  rbrck <- stackApply(rbrck, month(date_seq), fun = fun.a)
-  rbrck <- flip(t(rbrck), direction = "x")
-  rbrck <- mask(rbrck, mask)
-  
-  names(rbrck) <- paste(var, unique(year(monthly_seq)), 
-                        ifelse(nchar(unique(month(monthly_seq))) == 1, 
-                               paste0("0", unique(month(monthly_seq))), 
-                               unique(month(monthly_seq))),
-                        unique(month(monthly_seq, label = TRUE)),
-                        sep = "_")
-  
-  return(rbrck)
-}  
-
-step2 <- function(x, start, end, var) {
-  
-  start_date <- as.Date(paste(start, "01", "01", sep = "-"))
-  end_date <- as.Date(paste(end, "12", "31", sep = "-"))
-  monthly_seq <- month(seq(start_date, end_date, by = "1 month"))
-  
-  normals <- stackApply(x, indices = monthly_seq, fun = mean)
-  names(normals) <- paste(var, unique(month(monthly_seq, label = TRUE)),
-                          sep = "_")
-  
-  dir.create(paste0(dir, "Short_Update/", dir_proc,  var,  "/"), showWarnings = FALSE)
-  out <- paste0(dir, "Short_Update/", dir_proc,  var,  "/")
-  writeRaster(normals, filename = paste0(out,names(normals)),
-              format = "GTiff", bylayer=TRUE, overwrite = TRUE)
-}
-
-# Set directories and projections -----------------------------------------
-
-dir <- ifelse(Sys.getenv("LOGNAME") == "NateM", "/Users/NateM/Dropbox/Professional/RScripts/",
-              ifelse(Sys.getenv("LOGNAME") == "nami1114", "/Users/nami1114/Dropbox/Professional/RScripts/",
-                     ifelse(Sys.getenv("LOGNAME") == "rana7082", "/Users/rana7082/Dropbox/", "C:/Users/rnagy/Dropbox/")))
-dir_proc <- "data/processed/"
-
 # To be used in the parallelized sections of the code
 UseCores <- detectCores() -1
 
+# set projections
 #EPSG:102003 USA_Contiguous_Albers_Equal_Area_Conic
 proj_ea <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
@@ -133,29 +27,29 @@ proj_ed <- "+proj=eqdc +lat_0=39 +lon_0=-96 +lat_1=33 +lat_2=45 +x_0=0 +y_0=0 +d
 proj_ll <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 
 
-# Import Shapefiles from Geodatabase -------------------------------------------------------
+# import data layers -------------------------------------------------------
 
 #Import the USA States layer
-usa_shp <- st_read(dsn = paste0(dir, "Short_Update/data/bounds/state"),
-                   layer = "cb_2016_us_state_20m", quiet= TRUE) %>%
-  st_transform(., proj_ea) %>%
-  subset(., NAME != "Alaska" &
-           NAME != "Hawaii" &
-           NAME != "Puerto Rico") %>%
-  mutate(area_m2 = as.numeric(st_area(geometry)),
-         StArea_km2 = area_m2/1000000,
-         group = 1) %>%
-  st_simplify(., preserveTopology = TRUE) 
-plot(usa_shp[5])
+#usa_shp <- st_read(dsn = paste0("data/raw/conus"),
+                   #layer = "cb_2016_us_state_20m", quiet= TRUE) %>%
+  #st_transform(., proj_ea) %>%
+  #subset(., NAME != "Alaska" &
+           #NAME != "Hawaii" &
+           #NAME != "Puerto Rico") %>%
+  #mutate(area_m2 = as.numeric(st_area(geometry)),
+         #StArea_km2 = area_m2/1000000,
+         #group = 1) %>%
+  #st_simplify(., preserveTopology = TRUE) 
+#plot(usa_shp[5])
 
 # Dissolve to the USA Boundary
-conus <- usa_shp %>%
-  group_by(group) %>%
-  st_union()
-plot(conus)
+#conus <- usa_shp %>%
+  #group_by(group) %>%
+  #st_union()
+#plot(conus)
 
 # Import the Level 3 Ecoregions
-eco = paste0(dir, "Short_Update/data/bounds/us_eco_l3")
+eco = paste0("data/raw/us_eco_l3")
 ecoreg <- st_read(dsn = eco, layer = "us_eco_l3", quiet= TRUE) %>%
   st_transform(., proj_ea) %>%
   st_simplify(., preserveTopology = TRUE, dTolerance = 1000) %>%
@@ -163,14 +57,14 @@ ecoreg <- st_read(dsn = eco, layer = "us_eco_l3", quiet= TRUE) %>%
          EcoArea_km2 = area_m2/1000000)
 plot(ecoreg[2])
 
-# Intersects the region 
-state_eco <- st_intersection(usa_shp, ecoreg) %>%
-  dplyr::select(STUSPS, NAME, StArea_km2, US_L3CODE, US_L3NAME, EcoArea_km2, NA_L2NAME, NA_L1CODE, NA_L1NAME, geometry)
-plot(state_eco[2])
+# Intersects states with ecoregions
+#state_eco <- st_intersection(usa_shp, ecoreg) %>%
+  #dplyr::select(STUSPS, NAME, StArea_km2, US_L3CODE, US_L3NAME, EcoArea_km2, NA_L2NAME, NA_L1CODE, NA_L1NAME, geometry)
+#plot(state_eco[2])
 
 
-# Read the FPA database class
-shrt_fire <- st_read(dsn = paste0(dir, "Short_Update/data/fire/fpa-fod/Data/FPA_FOD_20170508.gdb"),
+# Read the FPA (Short) database class
+shrt_fire <- st_read(dsn = paste0("data/raw/fpa-fod/Data/FPA_FOD_20170508.gdb"),
                      layer = "Fires", quiet= TRUE) %>%
   st_transform(., proj_ea) %>%
   filter(STATE != "AK" & STATE != "PR" & STATE != "HI" & FIRE_SIZE >= 0.01) %>%
@@ -184,123 +78,12 @@ shrt_fire <- st_read(dsn = paste0(dir, "Short_Update/data/fire/fpa-fod/Data/FPA_
          DISCOVERY_MONTH = month(DISCOVERY_DATE),
          DISCOVERY_YEAR = FIRE_YEAR)
 
-# Produce the monthly normals --> Wind -------------------------------------------------------------
-# This task only needs to be run 1 time 
-# After this is ran then you will have produced the monthly normals from 1992-2015
-cl <- makeCluster(UseCores)
 
-# Step 1
-wind_dl <- list.files(paste0(dir, "Short_Update/data/climate/windsp"), pattern = "nc", full.names = TRUE)
 
-mask <- st_transform(usa_shp, proj_ll)
+#Extract average monthly wind data to Short ------------------------------------------------
+#Bring in average monthly wind data
 
-# Create monthly means to raster list
-
-# Not parallelized
-#windsp <- lapply(wind_dl, step1, mask = as(mask, "Spatial"), fun.a = mean)
-
-# Parallelized
-windsp <- foreach(i = 1:length(wind_dl)) %dopar% {
-  step1(wind_dl[i], as(mask, "Spatial"), mean)}
-stopCluster(cl)
-
-# Stack to master brick
-windsp <- do.call(stack,windsp)
-
-# Step 2
-# Calculate normals and write out to GeoTif
-# The variable windsp will be a usable raster stack
-windsp <- step2(windsp, "1979", "1981", "tmp")
-
-# Produce the monthly normals -->  Fuel Moisture -------------------------------------------------------------
-# This task only needs to be run 1 time 
-# After this is ran then you will have produced the monthly normals from 1992-2015
-cl <- makeCluster(UseCores)
-
-# Step 1
-fm_dl <- list.files(paste0(dir, "Short_Update/data/veg/fm100"), pattern = "nc", full.names = TRUE)
-
-# Create monthly means to raster list
-
-# Not parallelized
-#fm <- lapply(fm_dl, step1, mask = as(mask, "Spatial"), fun.a = mean)
-
-# Parallelized
-fm <- foreach(i = 1:length(fm_dl)) %dopar% {
-  step1(fm_dl[i], as(mask, "Spatial"), mean)}
-stopCluster(cl)
-
-# Stack to master brick
-fm <- do.call(stack,fm)
-
-# Step 2
-# Calculate normals and write out to GeoTif
-# The variable fm will be a usable raster stack
-fm <- step2(fm, "1979", "1981", "tmp")
-
-# Extract normals LOOPS NOT WORKING------------------------------------------------
-
-extract_function <- function(y, x){
-  file_split <- y %>%
-    basename %>%
-    strsplit(split = "_") %>%
-    unlist
-  var <- file_split[1]
-  
-  rstb <- stack()
-  for(i in 1:NROW(y)){
-    tempraster <- raster(y[i])
-    rstb <- stack(rstb,tempraster)
-  }
-  
-  # shrt_wind <- list()
-  # for(i in 1:nrow(x)){
-  #   if(x$DISCOVERY_MONTH > 0) {
-  #     raster::extract(rstb, as(x[i], "Spatial"), sp = TRUE)
-  #   } 
-  extracList <- vector("list", length(x)) 
-  cnt <- 0 
-  for(i in 1:NROW(x)){
-    cnt <- cnt + 1 
-    if(x$DISCOVERY_MONTH > 1) {
-      extracList[[cnt]] <- raster::extract(rstb, as(x[i], "Spatial"), sp = TRUE)
-    } 
-    else {
-      stop("Didn't work sucka")
-    }
-  }
-}
-
-extract_function <- function(y, x){
-  file_split <- y %>%
-    basename %>%
-    strsplit(split = "_") %>%
-    unlist
-  var <- file_split[1]
-  
-  rstb <- stack()
-  for(i in 1:NROW(y)){
-    tempraster <- raster(y[i])
-    rstb <- stack(rstb,tempraster)
-  }
-  
-  extracList <- vector("list", length(x)) 
-  cnt <- 0 
-  for(i in 1:NROW(x)){
-    cnt <- cnt + 1 
-    if(x$DISCOVERY_MONTH > 1) {
-      extracList[[cnt]] <- raster::extract(rstb, as(x[i], "Spatial"), sp = TRUE)
-    } 
-    else {
-      stop("Didn't work sucka")
-    }
-  }
-  return(extracList)
-}
-
-# Extract WIND normals to short ------------------------------------------------
-
-wind_dl <- list.files(paste0(dir, "Short_Update/data/processed/vs/normals"), pattern = "tif", full.names = TRUE)
+wind_dl <- list.files(paste0("data/climate/ws/ws/"), pattern = "tif", full.names = TRUE)
 
 wind <- lapply(wind_dl, raster) 
 
@@ -313,7 +96,6 @@ wind_jan <- raster::extract(wind[[5]],
 wind_jan <- st_as_sf(wind_jan) %>%
   mutate(Wind = vs_Jan) %>%
   dplyr::select(-starts_with("vs_"))
-
 
 shrt_feb <- shrt_fire %>%
   subset(DISCOVERY_MONTH == "2") %>%
@@ -438,10 +220,16 @@ shrt_wind <- wind_jan %>%
   bind_rows(., wind_nov) %>%
   bind_rows(., wind_dec)
 
+str(shrt_wind)
 
-# Extract FUEL MOISTURE normals to short ------------------------------------------------
+#make into a data frame
+shrt_wind_df <- as.data.frame(shrt_wind) %>%
+  dplyr::select("FPA_ID", "Wind")
 
-fm_dl <- list.files(paste0(dir, "Short_Update/data/processed/fm100/normals"), pattern = "tif", full.names = TRUE)
+
+#Extract average monthly fuel moisture data to Short ------------------------------------------------
+#Bring in average monthly fuel moisture data
+fm_dl <- list.files(paste0("data/climate/fm/fm100/"), pattern = "tif", full.names = TRUE)
 
 fm <- lapply(fm_dl, raster) 
 
@@ -579,39 +367,49 @@ shrt_fm <- fm_jan %>%
   bind_rows(., fm_nov) %>%
   bind_rows(., fm_dec) 
 
+#make into a dataframe
 shrt_fm_df <- as.data.frame(shrt_fm) %>%
   dplyr::select("FPA_ID", "fm")
 
-#this did not work
-shrt_wind_fm <- shrt_wind %>%
-  left_join.sf(., shrt_fm_df, by = "FPA_ID")
-
-#this did not work
-shrt_wind_fm <- left_join.sf(shrt_wind, shrt_fm_df, by = "FPA_ID")
-
-##st_join(x, y, join = st_intersects, FUN, suffix = c(".x", ".y"),
-#prepared = TRUE, left = TRUE, ...)
-
-#this might not work because of the dataframe, but I want to use the version that has only 2 variables
-shrt_clm<-st_join(shrt_wind, shrt_fm_df, left = TRUE, by = "FPA_ID")
 
 
+##################################
 # Import biophysical setting ---------------------------------------------
-bps <- raster(paste0(dir, "Short_Update/data/veg/US_130_BPS/grid/us_130bps"))
+bps <- raster(paste0("data/raw/us_130bps/grid/us_130bps"))
 bps.ref <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 shrt_bps <- shrt_fire %>%
   st_transform(., bps.ref)
 shrt_bps <- raster::extract(bps, as(shrt_bps, "Spatial"), sp = TRUE)
 shrt_bps <- st_transform(shrt_bps, proj_ea)
-
+#this never stops running
 
 
 # Import biomass data ----------------------------------------------------
-bio <- raster(paste0(dir, "Short_Update/data/veg/WoodsHole_Biomass_240m/NBCD_countrywide_biomass_mosaic.tif"))
+bio <- raster(paste0("data/raw/NBCD_countrywide_biomass_mosaic/NBCD_countrywide_biomass_mosaic.tif"))
+#need bps to stop running before this next step
 shrt_veg <- raster::extract(bio, as(shrt_bps, "Spatial"), sp = TRUE)
 
 
-#need to join shrt_veg , shrt_wind, and shrt_fm to master dataset with all extracted variables
+
+
+
+######################
+#need to join shrt_veg , shrt_wind, shrt_fm plus ecoreg to one master dataset with all extracted variables
+#start with shrt_wind and shrt_fm
+#try left_join.sf
+#this did not work
+shrt_wind_fm <- left_join.sf(shrt_wind, shrt_fm_df, by = "FPA_ID")
+shrt_wind_fm <- left_join.sf(shrt_wind, shrt_fm_df, by = "FPA_ID")
+
+#try st_join
+#this did not work
+shrt_clm<-st_join(shrt_wind, shrt_fm_df, left = TRUE, by = "FPA_ID")
+shrt_clm<-st_join(shrt_wind, shrt_fm, left = TRUE)
+shrt_clm<-st_join(shrt_wind_df, shrt_fm_df, left = TRUE, by = "FPA_ID")
+######################
+
+
+
 
 
 
