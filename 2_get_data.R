@@ -1,5 +1,5 @@
 
-source("src/R/1_create_folders.R")
+source("1_create_folders.R")
 
 #Download the USA States layer
 
