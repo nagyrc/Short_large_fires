@@ -82,7 +82,7 @@ write.table(fff, "/Users/rana7082/Dropbox/ecoregions/derived/firehasum_ecn_top_t
 #calculate % human by ecoregion for just top 10% largest fires
 #use this to make Figure 1 
 
-#run on each subset (human and lightning)
+#summary statistics on each subset (human and lightning)
 #human subset of large fires only
 outputh=NULL
 
@@ -120,7 +120,7 @@ output2$totfires<-output2$hnobs+output2$lnobs
 #calculate the percent of human ignitions by ecoregion
 output2$perh<-output2$hnobs/output2$totfires*100
 
-#put back in NA_L3CODE to join easily in Arc
+#put NA_L3CODE back in to join easily in Arc
 tt9<-unique(subz[c("ecn", "NA_L3CODE")])
 jjj<-left_join(output2,tt9,by="ecn")
 
@@ -172,7 +172,6 @@ colnames(r2m)<-c(1:366)
 barplot(r2m, beside=T, horiz=F, legend=T, col=c("red", "blue"), 
         xlab = "Day of year in Julian Day", ylab = "Number of Fires", 
         border=c("red","blue"), cex.names=1.25, cex.axis=1.25, cex.lab=1.25,ylim=c(0,1200))
-#this looks pretty funky, but is fine when you zoom in 
 
 #check to make sure correct # obs
 yyy<-rowSums(r2m[,])
@@ -195,7 +194,7 @@ write.table(r4.1, "C:/Users/rnagy/Dropbox/ecoregions/derived/meddoyhl.csv", sep=
 ################################################
 
 
-#stats about what is human fire vs. lightning large fire season
+#stats about what is large human fire season vs. large lightning fire season
 hsub<-subset(outputy,outputy$ig=="human")
 lsub<-subset(outputy,outputy$ig=="lightning")
 
@@ -225,7 +224,7 @@ r66 <- summaryBy(OBJECTID~NA_L3CODE, data=out, FUN=nobs)
 r66
 
 #output table
-write.table(r66, "C:/Users/rnagy/Dropbox/ecoregions/derived/non_light_season.csv", sep=",", row.names=FALSE)
+write.table(r66, "/Users/rana7082/Dropbox/ecoregions/derived/non_light_season.csv", sep=",", row.names=FALSE)
 
 
 #########################################
@@ -236,14 +235,7 @@ setwd("/Users/rana7082-su/Dropbox/ecoregions/derived/")
 regiontab<-read.csv("arc_map_regions.csv")
 region<-as.data.frame(regiontab)
 
-head(region)
-head(outputy)
-
-str(region)
-str(outputy)
-
 outputrr<-left_join(outputy,region,by="NA_L3CODE")
-head(outputrr)
 
 rr<-summaryBy(OBJECTID~ig+region, data=outputrr, FUN=nobs)
 rr
