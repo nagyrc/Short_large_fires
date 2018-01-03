@@ -38,7 +38,7 @@ ws_out <- file.path(ws_crt, "ws")
 fm_out <- file.path(fm_crt, "fm100")
 
 # Check if directory exists for all variable aggregate outputs, if not then create
-var_dir <- list(prefix, raw_prefix, ecoregion_prefix, fpa_prefix, conus_prefix, bio_prefix, bps_prefix, climate_prefix, fm_prefix, ws_prefix,
+var_dir <- list(prefix, raw_prefix, ecoregion_prefix, fpa_prefix, conus_prefix, biomass_prefix, bps_prefix, fm_prefix, ws_prefix,
                 bounds_crt, conus_crt, ecoreg_crt, fire_crt, bio_crt, biomass_crt, bps_crt, climate_crt, ws_crt, fm_crt,
                 us_out, ecoregion_out, fpa_out, biomass_out, bps_out, ws_out, fm_out)
 lapply(var_dir, function(x) if(!dir.exists(x)) dir.create(x, showWarnings = FALSE))
