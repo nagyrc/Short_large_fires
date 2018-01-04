@@ -13,85 +13,68 @@ library(plotrix)
 
 #bring in Short data with fm and ws extracted
 #note, this has large fires only
-read<- read.csv("data/merged//Short_large10_FM_Wind.csv")
+read<- read.csv("data/merged/Short_large10_FM_Wind.csv")
 
+#lines 19-65 maybe should be moved to another script (climatevars_ecoregion_github.R)
 #summary statistics for large fires (mean, median, min, and max fire size) by ecoregion
 sum1<-summaryBy(data=read, ha~NA_L3NAME, FUN=c(length,mean, median,min, max))
-head(sum1)
+
 write.table(sum1, "C:/Users/rnagy/Dropbox/ecoregions/derived/fireha_ecn_stats.csv", sep=",", row.names=FALSE, append=FALSE)
 #used to make Table S1
 
+#summary of mean fire size by ignition and ecoregion
 sum2<-summaryBy(data=read, ha~ig+NA_L3NAME, FUN=c(mean))
-head(sum2)
+
 #tranform this to wide, then do paired t=test
-#w <- reshape(df1, timevar = "ig", idvar = "NA_L3CODE", v.names = "fm100_m.mean", direction = "wide")
-#t.test(w$fm100_m.mean.human,w$fm100_m.mean.lightning,paired=TRUE)
 w<-reshape(sum2,timevar="ig",idvar="NA_L3NAME",v.names="ha.mean",direction="wide")
-head(w)
+
 t.test(w$ha.mean.human,w$ha.mean.lightning,paired=TRUE)
 #p=0.002; lightning fires are sig larger than human fires by ecoregion
 summary(w$ha.mean.human)
-#mean=285.300
+#mean=285.300 ha
 summary(w$ha.mean.lightning)
-#mean=488.400
+#mean=488.400 ha
 
-head(readsub)
-readsubdf<-as.data.frame(readsub)
-summary(readsub$ig)
+#how many large fires of lightning and human igition?
+summary(read$ig)
 #human=129966, light=30640
+129966+30640
+#160606 total large fires
 
-
-#format of NA_L3CODE is all messed up
-#remove that field
-readsubdf$NA_L3CODE<-NULL
-head(readsubdf)
+#the format of NA_L3CODE is all messed up, so remove that field
+read$NA_L3CODE<-NULL
+head(read)
 
 #bring in something else that can make key from
-readz<- read.csv("C:/Users/rnagy/Dropbox/ecoregions/derived/Short_large10.csv")
-readz<- read.csv("/Users/rana7082/Dropbox/ecoregions/derived/Short_large10.csv")
-#unique(df[c("yad", "per")])
+readz<- read.csv("data/fire/Short_large10.csv")
 
 key<-unique(readz[c("NA_L3CODE","NA_L3NAME")])
-key
 
-joinz<-left_join(readsubdf,key,by=c('NA_L3NAME'))
+joinz<-left_join(read,key,by=c('NA_L3NAME'))
 head(joinz)
-
-subecbp<- subset(joinz, joinz$NA_L3CODE == "8.2.4")
-subecbp
-
-subhelp<- subset(joinz, joinz$NA_L3CODE == "8.2.2")
-subhelp
-
-#129883+30635=160,518 (old dataset)
-#160,606 new dataset
+#this now has a correct field for NA_L3CODE
 
 
 
+#summary stats of large fire summed burned area by ignition and ecoregion
 sum66<-summaryBy(data=joinz, ha~ig+NA_L3CODE, FUN=c(sum))
-sum66
 
 w<-reshape(sum66,timevar="ig",idvar="NA_L3CODE",v.names="ha.sum",direction="wide")
-w
 
 write.table(w, "C:/Users/rnagy/Dropbox/ecoregions/derived/burned_area_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 ##########
 #for large fires only
 
-head(joinz$ha)
 tt3<-unique(joinz$NA_L3CODE)
 
-
-#plot these conditions where large human and large lightning fires exist
+#plot the conditions where large human and large lightning fires exist
 hub<-joinz[which(joinz$STAT_CAU_1!="Lightning"),]
 lub<-joinz[which(joinz$STAT_CAU_1=="Lightning"),]
 
 #hub nobs= 129,966
 #lub nobs= 30,640
 
-129966+30640
-#160,606
 
 csv2<- read.csv("/Users/rana7082/Dropbox/ecoregions/derived/Short_large10.csv")
 #160,608 obs
