@@ -10,15 +10,7 @@ library(dplyr)
 library(tibble)
 
 #updated Short data and joined with ecoregion data
-
-setwd("/Users/rana7082/Dropbox/ecoregions/derived/")
-setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
-setwd("/Users/rana7082-su/Dropbox/ecoregions/derived/")
-
-#get updated Short data from: update_Short_dataset_102716.R
-slimtab <- read.csv("updatedShort_w_eco_slim3.csv")
-
-slim<-as.data.frame(slimtab)
+slim<-as.data.frame(read.csv("data/merged/updatedShort_w_eco_slim3.csv"))
 
 slim$ecn<-as.character(gsub("\\.","",slim$NA_L3CODE))
 slim$ecn<-as.numeric(slim$ecn)
@@ -229,11 +221,7 @@ write.table(r66, "/Users/rana7082/Dropbox/ecoregions/derived/non_light_season.cs
 
 #########################################
 #split into east and west US; Figure 3a; Figure 3b
-setwd("/Users/rana7082/Dropbox/ecoregions/derived/")
-setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
-setwd("/Users/rana7082-su/Dropbox/ecoregions/derived/")
-regiontab<-read.csv("arc_map_regions.csv")
-region<-as.data.frame(regiontab)
+region<-as.data.frame(read.csv("data/bounds/ecoregion/east_west/arc_map_regions.csv"))
 
 outputrr<-left_join(outputy,region,by="NA_L3CODE")
 
@@ -257,64 +245,55 @@ rr
 
 (23066/64920)*100
 
-r3 <- summaryBy(OBJECTID~DISCOVERY1+ig+region, data=outputrr, FUN=nobs)
-r3
+r5 <- summaryBy(OBJECTID~DISCOVERY1+ig+region, data=outputrr, FUN=nobs)
+r5
 #tt<-as.numeric(unique(r3$ecn))
 
-head(r3)
+head(r5)
 
-r3east <- subset(r3, r3$region == "east")
-r3west <- subset(r3, r3$region == "west")
+r5east <- subset(r5, r5$region == "east")
+r6west <- subset(r5, r5$region == "west")
 
 
 #east
 # fire season, large fires, all ecoregions, Figure 3a in manuscript
-head(r3east)
+r5east <- subset(r5east, select = -c(region) )
 
-r3east <- subset(r3east, select = -c(region) )
+wide5 <- reshape(r5east,v.names="OBJECTID.nobs", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
+wide5[is.na(wide5)] <- 0
 
-wide <- reshape(r3east,v.names="OBJECTID.nobs", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
-wide[is.na(wide)] <- 0
+w5 <- wide5[,2:length(wide5)]
 
-head(wide)
+colnames(wide5) <- c("ig", substr(colnames(w5), 11, 13))
+colnames(wide5) <- c("ig", substr(colnames(w5), 11, 13))
 
-w <- wide[,2:length(wide)]
-head(w)
-colnames(wide) <- c("ig", substr(colnames(w), 11, 13))
-colnames(wide) <- c("ig", substr(colnames(w), 11, 13))
+r5m <- as.matrix(wide5[,2:length(wide5)])
+rownames(r5m) <- wide5[,1]
+colnames(r5m)<-c(1:366)
 
-r2m <- as.matrix(wide[,2:length(wide)])
-rownames(r2m) <- wide[,1]
-colnames(r2m)<-c(1:366)
 
-head(r2m)
-
-barplot(r2m, beside=T, horiz=F, legend=T, col=c("red", "blue"), 
+barplot(r5m, beside=T, horiz=F, legend=T, col=c("red", "blue"), 
         xlab = "Day of year in Julian Day", ylab = "Number of Fires", main= "East",
         border=c("red","blue"), cex.names=1.25, cex.axis=1.25, cex.lab=1.25,ylim=c(0,1200))
 
 
 
 #west
-r3west <- subset(r3west, select = -c(region) )
+r6west <- subset(r6west, select = -c(region) )
 
-wide <- reshape(r3west,v.names="OBJECTID.nobs", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
-wide[is.na(wide)] <- 0
+wide6 <- reshape(r6west,v.names="OBJECTID.nobs", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
+wide6[is.na(wide6)] <- 0
 
-head(wide)
+w6 <- wide6[,2:length(wide6)]
 
-w <- wide[,2:length(wide)]
-head(w)
-colnames(wide) <- c("ig", substr(colnames(w), 11, 13))
-colnames(wide) <- c("ig", substr(colnames(w), 11, 13))
+colnames(wide6) <- c("ig", substr(colnames(w6), 11, 13))
+colnames(wide6) <- c("ig", substr(colnames(w6), 11, 13))
 
-r2m <- as.matrix(wide[,2:length(wide)])
-rownames(r2m) <- wide[,1]
-colnames(r2m)<-c(1:366)
+r6m <- as.matrix(wide6[,2:length(wide6)])
+rownames(r6m) <- wide6[,1]
+colnames(r6m)<-c(1:366)
 
-head(r2m)
-
-barplot(r2m, beside=T, horiz=F, legend=T, col=c("red", "blue"), 
+barplot(r6m, beside=T, horiz=F, legend=T, col=c("red", "blue"), 
         xlab = "Day of year in Julian Day", ylab = "Number of Fires", main="West",
         border=c("red","blue"), cex.names=1.25, cex.axis=1.25, cex.lab=1.25,ylim=c(0,1200))
 
@@ -333,8 +312,8 @@ barplot(r2m, beside=T, horiz=F, legend=T, col=c("red", "blue"),
 outputhrr<-outputrr[outputrr$ig=="human",]
 
 #large human-caused fires only
-r3 <- summaryBy(OBJECTID~DISCOVERY1+region, data=outputhrr, FUN=nobs)
-head(r3)
+r8 <- summaryBy(OBJECTID~DISCOVERY1+region, data=outputhrr, FUN=nobs)
+head(r8)
 
 #fires of all sizes
 subzrr<-left_join(subz,region,by="NA_L3CODE")
@@ -343,11 +322,11 @@ head(subzrr)
 #subset for human-caused fires of all sizes only
 subzhrr<-subzrr[subzrr$ig=="human",]
 
-r4 <- summaryBy(OBJECTID~DISCOVERY1+region, data=subzhrr, FUN=nobs)
-head(r4)
+r9 <- summaryBy(OBJECTID~DISCOVERY1+region, data=subzhrr, FUN=nobs)
+head(r9)
 
 #join together
-lll<-merge(r3,r4, by=c("DISCOVERY1","region"))
+lll<-merge(r8,r9, by=c("DISCOVERY1","region"))
 head(lll)
 lll
 
@@ -378,19 +357,15 @@ summary(lm(large~all, data=tempe))
 #seasonal correlations at the ecoregion scale
 #number of fires by Julian day of year
 #human ignitions only
-head(output)
-
 outputh<-outputy[outputy$ig=="human",]
 
-r5 <- summaryBy(OBJECTID~DISCOVERY1+NA_L3CODE, data=outputh, FUN=nobs)
-head(r5)
+r11 <- summaryBy(OBJECTID~DISCOVERY1+NA_L3CODE, data=outputh, FUN=nobs)
 
 subzh<-subz[subz$ig=="human",]
 
-r6 <- summaryBy(OBJECTID~DISCOVERY1+NA_L3CODE, data=subzh, FUN=nobs)
-head(r6)
+r12 <- summaryBy(OBJECTID~DISCOVERY1+NA_L3CODE, data=subzh, FUN=nobs)
 
-qqq<-merge(r5,r5, by=c("DISCOVERY1","NA_L3CODE"))
+qqq<-merge(r11,r12, by=c("DISCOVERY1","NA_L3CODE"))
 head(qqq)
 
 
@@ -406,7 +381,7 @@ summary(lm(large~all, data=qqq))
 
 
 ttq<-unique(qqq$NA_L3CODE)
-ttq
+
 
 outpute<-NULL
 for (i in ttq) {
@@ -428,7 +403,6 @@ dfe$NA_L3CODE<-ttqv
 
 row.names(df)<-NULL
 
-
 head(dfe)
 
 write.table(dfe, "/Users/rana7082/Dropbox/ecoregions/derived/seasonal_corr_human_only.csv", sep=",", row.names=FALSE)
@@ -448,7 +422,7 @@ write.table(dfe, "/Users/rana7082/Dropbox/ecoregions/derived/seasonal_corr_human
 
 
 ####################################
-#looking at the large fire data
+#large fire data exploration
 
 #what is max fire size of large fires?
 summary(outputy$ha)
@@ -463,6 +437,7 @@ ggplot(data=outputy, aes(outputy$ha)) +
 
 #######################
 #individual ecoregion histograms of fire size by human and lightning ignitions
+#not shown in manuscript
 hpy <- list()
 
 for (i in tt3) {
@@ -488,6 +463,7 @@ hpy[821]
 #seasonal correlations of large fires with fires of all sizes for east and west (by region)
 #number of fires by Julian day of year
 #fires of all causes
+#not reported in the manuscript
 
 #large fires only
 r3 <- summaryBy(OBJECTID~DISCOVERY1+region, data=outputrr, FUN=nobs)
