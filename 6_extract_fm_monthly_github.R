@@ -15,6 +15,7 @@ library(plotrix)
 #note, this has large fires only
 read<- read.csv("data/merged/Short_large10_FM_Wind.csv")
 
+#####
 #lines 19-65 maybe should be moved to another script (climatevars_ecoregion_github.R)
 #summary statistics for large fires (mean, median, min, and max fire size) by ecoregion
 sum1<-summaryBy(data=read, ha~NA_L3NAME, FUN=c(length,mean, median,min, max))
@@ -72,23 +73,9 @@ tt3<-unique(joinz$NA_L3CODE)
 hub<-joinz[which(joinz$STAT_CAU_1!="Lightning"),]
 lub<-joinz[which(joinz$STAT_CAU_1=="Lightning"),]
 
-#hub nobs= 129,966
-#lub nobs= 30,640
 
-
-csv2<- read.csv("/Users/rana7082/Dropbox/ecoregions/derived/Short_large10.csv")
-#160,608 obs
-
-subecbp2<- subset(csv2, csv2$NA_L3CODE == "8.2.4")
-subecbp2
-#31 obs, 0 lightning
-
-subhelp2<- subset(csv2, csv2$NA_L3CODE == "8.2.2")
-subhelp2
-#35 obs, 0 lightning
-
-head(hub)
-
+####
+#xy scatterplots of wind speed vs. fm for large fires
 #human only
 p16 <- ggplot() + 
   geom_point(data = hub, color='red', aes(x = fm100_m, y = mnwind_m)) +
@@ -126,33 +113,19 @@ p16 <- ggplot() +
   ylim(0,9)+
   theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))
 p16
+####
 
 
 
 
 
-#try binning...yay, this worked!
-#geom_bin2d(mapping = NULL, data = NULL, stat = "bin2d", position = "identity", ..., na.rm = FALSE, show.legend = NA, inherit.aes = TRUE)
-#two -9999 values in hub$fm_1000hr
-hub2<-subset(hub, fm100_m>=0)
 
 
 
 
 
 ###
-#box and whisker plot for each variable or bagplot for both
-head(joinz)
-
-library(ggplot2)
-#both, but this does not show variation in y axis
-ggplot(joinz, aes(x = fm100_m, y=mnwind_m, fill = ig)) +
-  geom_boxplot() +
-  scale_fill_manual(values = c("red", "blue"))+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  labs(x="100 hr fuel moisture",y="wind speed") 
-
+#box and whisker plot for each variable (fuel moisture or wind speed by ignition type)
 #fm only; figure 5c
 ggplot(joinz, aes(x = ig, y = fm100_m,fill=ig)) +
   geom_boxplot()+
@@ -170,138 +143,98 @@ ggplot(joinz, aes(x = ig, y = mnwind_m,fill=ig)) +
   theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
   labs(y="wind speed",x="ignition")
 
-#bagplot
-library(aplpack)
-bagplot(joinz$fm100_m,joinz$mnwind_m, xlab="fuel moisture", ylab="wind speed")
 
-
+summary(hub)
 ###
 #######################################
 #stats
-mean(hub2$fm100_m)
+mean(hub$fm100_m)
 #14.56
-median(hub2$fm100_m)
+median(hub$fm100_m)
 #15.21
 mean(lub$fm100_m)
 #11.45
 median(lub$fm100_m)
 #10.76
-std.error(hub2$fm100_m)
+std.error(hub$fm100_m)
 #0.008
 std.error(lub$fm100_m)
 #0.022
 
-mean(hub2$mnwind_m)
+mean(hub$mnwind_m)
 #3.96
-median(hub2$mnwind_m)
+median(hub$mnwind_m)
 #3.999
 mean(lub$mnwind_m)
 #3.418
 median(lub$mnwind_m)
 #3.306
 
-std.error(hub2$mnwind_m)
+std.error(hub$mnwind_m)
 #0.00198
 std.error(lub$mnwind_m)
 #0.003566
 
 
 
-head(hub2)
-mean(hub2$stdwind_m)
+
+mean(hub$stdwind_m)
 #1.479
-median(hub2$stdwind_m)
+median(hub$stdwind_m)
 #1.514
 mean(lub$stdwind_m)
 #1.1658
 median(lub$stdwind_m)
 #1.12958
 
-std.error(hub2$stdwind_m)
+std.error(hub$stdwind_m)
 #0.000996
 std.error(lub$stdwind_m)
 #0.00172
 
 
-#t-test on joinz data by ig
-#t.test(y~x)
+#t-test of fuel moisture data by ignition type
 t.test(joinz$fm100_m~joinz$ig,var.equal = TRUE)
 #p=<2.2e-16
 
+#t-test of wind speed data by ignition type
 t.test(joinz$mnwind_m~joinz$ig,var.equal = TRUE)
 #p=<2.2e-16
 
+#t-test of wind speed standard deviation by ignition type
 t.test(joinz$stdwind_m~joinz$ig,var.equal = TRUE)
 #p=<2.2e-16
 
+#summary data of fuel moisture by ignition type and ecoregion
 tti1<-summaryBy(data=joinz, fm100_m~ig+NA_L3CODE)
-tti1
 
+#make a dataframe of this
 df1<-as.data.frame(tti1)
-head(df1)
 
-#w <- reshape(l.sort, timevar = "subj", idvar = c("id", "female", "race", "ses", "schtyp", "prog"), direction = "wide")
+#reshape dataframe
 w <- reshape(df1, timevar = "ig", idvar = "NA_L3CODE", v.names = "fm100_m.mean", direction = "wide")
 head(w)
 
+#calculate the difference in fuel moisture in human vs. lightning fires by ecoregion
 w$fmdiffmon<-w$fm100_m.mean.human-w$fm100_m.mean.lightning
 
 word<-w[with(w, order(-fmdiffmon)), ]
 word
 
-
+#t-test of the difference fuel moisture in human vs. lightning fires
 t.test(w$fm100_m.mean.human,w$fm100_m.mean.lightning,paired=TRUE)
 #p=7.039e-06
 
 ###
-#plots
-p16<-ggplot()+
-  geom_bin2d(bins=20,data=hub2, aes(x=fm100_m,y=mnwind_m))+
-  xlab('100 hr fuel moisture (%)') +
-  ylab('wind speed ()')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,30)+
-  ylim(0,9)+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
-  ggtitle("large human-caused fires")+
-  theme(plot.title = element_text(size=20))+
-  scale_fill_continuous(low="gray90", high="red", limits=c(0,20000),breaks=seq(0, 20000, by=4000))
-p16
 
-p16<-ggplot()+
-  geom_bin2d(bins=20,data=lub, aes(x=fm100_m,y=mnwind_m))+
-  xlab('100 hr fuel moisture (%)') +
-  ylab('wind speed ()')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,30)+
-  ylim(0,9)+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
-  ggtitle("large lightning-caused fires")+
-  theme(plot.title = element_text(size=20))+
-  scale_fill_continuous(low="gray90", high="blue",limits=c(0,20000), breaks=seq(0, 20000, by=4000))
-p16
 
 
 
 ###
-#try discrete binning
-#p <- ggplot(df, aes(x, y, fill=cut(..count.., c(0,6,8,9,Inf))))
-#p <- p + stat_bin2d(bins = 20)
-#p + scale_fill_hue("count")
+#break fuel moisture and wind speed into discrete bins
 
-hub2<-subset(hub, fm100_m>=0)
-summary(hub2$fm100_m)
-summary(hub$mnwind_m)
-
-#rrr<-quantile(hub2$fm_1000hr,probs = seq(0, 1, 0.20))
-#rrr
-
-
-
-#fm vs wind speed; figure 5a
-p <- ggplot(hub2, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
+#fm vs wind speed of large human-caused fires; figure 5a in manuscript
+p <- ggplot(hub, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
   geom_bin2d(bins = 20)+
   scale_fill_manual("count", values = c("gray90","gray70", "gray50", "red","red2","red4"))+
   xlim(0,30)+
@@ -315,7 +248,7 @@ p <- ggplot(hub2, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000
   theme(plot.title = element_text(size=20))
 p
 
-#figure 5b
+#fm vs wind speed of large lightning-caused fires; figure 5b in manuscript
 p <- ggplot(lub, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
   geom_bin2d(bins = 20)+
   scale_fill_manual("count", values = c("gray90","gray70", "gray50", "dodgerblue","dodgerblue2","dodgerblue4"))+
@@ -333,8 +266,8 @@ p
 
 
 
-#try a discrete bin fig for each ecoregion????
-#human
+#try a discrete bin fig for each ecoregion
+#human-caused large fires; this is Fig. S7a
 
 p <- ggplot(hub2, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000))))+
   geom_bin2d(bins = 20)+
@@ -355,7 +288,7 @@ p <- ggplot(hub2, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000
 p
 
 
-#lightning
+#lightning-caused large fires; this is Fig. S7b
 p <- ggplot(lub, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000))))+
   geom_bin2d(bins = 20)+
   scale_fill_manual("count", values = c("gray90","gray70", "gray50", "dodgerblue","dodgerblue4"))+
@@ -375,7 +308,7 @@ p <- ggplot(lub, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000)
 p
 
 
-
+####not reported in manuscript
 #fm vs. wind variability
 head(hub2)
 p <- ggplot(hub2, aes(fm100_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
