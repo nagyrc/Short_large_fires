@@ -384,29 +384,28 @@ p
 head(joinz)
 
 
-#mean fuel moisture vs. mean fire size by ecoregion
+#calculate mean fuel moisture vs. mean fire size by ecoregion
 tt1<-summaryBy(fm100_m~NA_L3CODE,data=joinz,FUN=c(mean))
 tt2<-summaryBy(mnwind_m~NA_L3CODE,data=joinz,FUN=c(mean))
-head(tt1)
 
+head(joinz)
+#join summary tables
 dfa <- merge(tt1,tt2,by=c("NA_L3CODE"))
-head(dfa)
+
+#output for later use
 write.table(dfa, "C:/Users/rnagy/Dropbox/ecoregions/derived/fm_ws_monthly_ecn.csv", sep=",", row.names=FALSE, append=FALSE)
 
-
-setwd("/Users/rana7082/Dropbox/ecoregions/derived/")
-setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
-firehatab<-read.csv("fireha_10.csv")
+#bring in fire size data by ecoregion (made in Script XXXXX)
+firehatab<-read.csv("data/fire/fireha_10.csv")
 fireha<-as.data.frame(firehatab)
-head(fireha)
 
 fireha$ecn<-as.numeric(gsub("[.]","",fireha$NA_L3CODE))
 
-library(dplyr)
+#join table of fire size and fuel moisture, wind speed by ecoregion
 dft<-left_join(dfa,fireha,by="NA_L3CODE")
 head(dft)
 
-#fire size vs. fuel moisture
+#regression of fire size vs. fuel moisture
 p16 <- ggplot(data = dft, aes(y = log(ha.mean), x = fm100_m.mean)) + 
   geom_point() +
   ylab('log (fire size (ha))') +
@@ -450,23 +449,16 @@ summary(lm1)
 head(dft)
 ####################
 #split into east and west US
-setwd("/Users/rana7082/Dropbox/ecoregions/derived/")
-setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
-regiontab<-read.csv("arc_map_regions.csv")
-region<-as.data.frame(regiontab)
+region<-as.data.frame(read.csv("data/bounds/ecoregion/east_west/arc_map_regions.csv"))
 
-library(dplyr)
 dftt<-left_join(dft,region,by="NA_L3CODE")
-head(dftt)
 
 east<-dftt[which(dftt$region=="east"),]
 west<-dftt[which(dftt$region=="west"),]
 
-head(east)
 
-#cs<-c(east="green",west="black")
 
-#plot both subsets on one plot
+#fuel moisture vs. fire size for east and west; Fig. 7a
 p16 <- ggplot(data = dftt, aes(y = log(ha.mean), x = fm100_m.mean,color=region)) + 
   geom_point() +
   ylab('log (fire size (ha))') +
@@ -488,6 +480,7 @@ summary(lm2)
 #p=0.0005; (-)
 
 head(dftt)
+#wind speed vs. fire size for east and west; Fig. 7b
 p16 <- ggplot(data = dftt, aes(y = log(ha.mean), x = mnwind_m.mean,color=region)) + 
   geom_point() +
   ylab('log (fire size (ha))') +
@@ -498,7 +491,6 @@ p16 <- ggplot(data = dftt, aes(y = log(ha.mean), x = mnwind_m.mean,color=region)
   ylim(0,10)+
   theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
   scale_color_manual(values=c("east"="black","west"="dark gray"))
-#geom_smooth(method='lm', formula=y~x, se=FALSE)
 p16
 
 lm3<-lm(log(ha.mean)~mnwind_m.mean, data=east)
@@ -515,7 +507,6 @@ summary(lm4)
 r2 <- summaryBy(fm100_m~ig+NA_L3CODE, data=joinz, FUN=mean)
 r2
 
-#cast(df, year ~ group, mean, value = 'income')
 w<-cast(r2, NA_L3CODE ~ ig, value = 'fm100_m.mean')
 w
 
@@ -523,9 +514,7 @@ w$diff_fm10<-w$human-w$lightning
 #where positive human > lightning
 
 #export table to join in Arc
-
 write.table(w, "/Users/rana7082/Dropbox/ecoregions/derived/diff_fm_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
-write.table(w, "C:/Users/rnagy/Dropbox/ecoregions/derived/diff_fm_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 head(joinz)
@@ -533,14 +522,12 @@ head(joinz)
 r3 <- summaryBy(mnwind_m~ig+NA_L3CODE, data=joinz, FUN=mean)
 r3
 
-#cast(df, year ~ group, mean, value = 'income')
 w<-cast(r3, NA_L3CODE ~ ig, value = 'mnwind_m.mean')
 w
 
 w$diff_windspeed<-w$human-w$lightning
 
 write.table(w, "/Users/rana7082/Dropbox/ecoregions/derived/diff_wind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
-write.table(w, "C:/Users/rnagy/Dropbox/ecoregions/derived/diff_wind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 
@@ -548,14 +535,12 @@ write.table(w, "C:/Users/rnagy/Dropbox/ecoregions/derived/diff_wind_NA_L3CODE_10
 r4 <- summaryBy(stdwind_m~ig+NA_L3CODE, data=joinz, FUN=mean)
 r4
 
-#cast(df, year ~ group, mean, value = 'income')
 w<-cast(r4, NA_L3CODE ~ ig, value = 'stdwind_m.mean')
 w
 
 w$diff_sdwindspeed<-w$human-w$lightning
 
 write.table(w, "/Users/rana7082/Dropbox/ecoregions/derived/diff_sdwind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
-write.table(w, "C:/Users/rnagy/Dropbox/ecoregions/derived/diff_sdwind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 
@@ -575,8 +560,8 @@ p16<-ggplot()+
   theme(plot.title = element_text(size=12))+
   scale_color_manual(values=c("red","blue"))+
   facet_wrap(~NA_L3CODE)+
-  theme(strip.background = element_blank())+
-  theme(panel.margin = unit(0, "lines"))
+  theme(strip.background = element_blank())
+  #theme(panel.spacing = unit(0, "lines"))
 p16
 
 lll<-as.data.frame(summaryBy(ha~NA_L3CODE+ig,data=joinz, FUN=mean))
@@ -619,7 +604,7 @@ w2 <- reshape(df2, timevar = "ig", idvar = "NA_L3CODE", v.names = "ha.median", d
 head(w2)
 
 
-#export for Figure S2b
+#not reported in manuscript
 write.table(w2, "C:/Users/rnagy/Dropbox/ecoregions/derived/firehamed_10hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
@@ -628,7 +613,7 @@ tti3<-summaryBy(data=joinz, ha~NA_L3CODE, FUN=median)
 df3<-as.data.frame(tti3)
 head(df3)
 
-#for Table S2a
+#for Table S1
 write.table(df3, "C:/Users/rnagy/Dropbox/ecoregions/derived/firehamed_10.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
@@ -651,8 +636,6 @@ ggplot(joinz,aes(log(x=ha)+1))+
   facet_grid(~ig)+
   theme_bw()
 
-hub <- subset(joinz, joinz$ig == "human")
-lub <- subset(joinz, joinz$ig == "lightning")
 
 ggplot(aes(log(x=ha)+1))+
   geom_histogram(data=hub)+
@@ -671,10 +654,10 @@ ggplot(aes(log(x=ha)+1))+
 
 head(joinz)
 
-#figure 2c
+#Figure 2b with lightning fires in front
 ggplot(joinz,aes(x=log(ha)+1)) + 
-  geom_histogram(data=subset(joinz,ig == 'human'),fill = "red",alpha=0.3)+
-  geom_histogram(data=subset(joinz,ig == 'lightning'),fill = "blue",alpha=0.3)+
+  geom_histogram(data=subset(joinz,ig == 'human'),fill = "red",alpha=0.7)+
+  geom_histogram(data=subset(joinz,ig == 'lightning'),fill = "blue",alpha=0.7)+
   theme_bw()+
   theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
   theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
@@ -682,15 +665,7 @@ ggplot(joinz,aes(x=log(ha)+1)) +
   xlab('log (fire size (ha))+1') +
   ylab('number of large fires')
 
-ggplot(joinz,aes(x=log(ha)+1)) + 
-  geom_histogram(data=subset(joinz,ig == 'lightning'),fill = "blue",alpha=0.7)+
-  geom_histogram(data=subset(joinz,ig == 'human'),fill = "red",alpha=0.7)+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
-  theme(plot.title = element_text(size=20))+
-  xlab('log (fire size (ha))+1') +
-  ylab('number of large fires')
+
 
 
 
