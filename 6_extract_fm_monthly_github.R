@@ -457,6 +457,7 @@ p16
 
 
 ###
+#fuel moisture vs. standard deviation of wind speed, human fires
 p <- ggplot(hub, aes(fm100_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
   geom_bin2d(bins = 20)+
   scale_fill_manual("count", values = c("gray90","gray70", "gray50", "red","red2","red4"))+
@@ -472,6 +473,7 @@ p <- ggplot(hub, aes(fm100_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000
 p
 
 
+#fuel moisture vs. standard deviation of wind speed, lightning fires
 p <- ggplot(lub, aes(fm100_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
   geom_bin2d(bins = 20)+
   scale_fill_manual("count", values = c("gray90","gray70", "gray50", "dodgerblue","dodgerblue2","dodgerblue4"))+
