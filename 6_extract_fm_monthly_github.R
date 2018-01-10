@@ -251,6 +251,7 @@ write.table(w, "C:/Users/rnagy/Dropbox/ecoregions/derived/burned_area_hl.csv", s
 
 
 ###
+#stats for fuel moisture
 mean(hub$fm100_m)
 #14.56
 median(hub$fm100_m)
@@ -264,6 +265,8 @@ std.error(hub$fm100_m)
 std.error(lub$fm100_m)
 #0.022
 
+
+#stats for wind speed
 mean(hub$mnwind_m)
 #3.96
 median(hub$mnwind_m)
@@ -279,7 +282,7 @@ std.error(lub$mnwind_m)
 #0.003566
 
 
-
+#stats for standard deviation of wind speed
 mean(hub$stdwind_m)
 #1.479
 median(hub$stdwind_m)
@@ -295,17 +298,19 @@ std.error(lub$stdwind_m)
 #0.00172
 
 
-#t-test of fuel moisture data by ignition type
+#t-test of mean fuel moisture data by ignition type
 t.test(joinz$fm100_m~joinz$ig,var.equal = TRUE)
 #p=<2.2e-16
 
-#t-test of wind speed data by ignition type
+#t-test of mean wind speed data by ignition type
 t.test(joinz$mnwind_m~joinz$ig,var.equal = TRUE)
 #p=<2.2e-16
 
-#t-test of wind speed standard deviation by ignition type
+#t-test of mean wind speed standard deviation by ignition type
 t.test(joinz$stdwind_m~joinz$ig,var.equal = TRUE)
 #p=<2.2e-16
+
+
 
 #summary data of fuel moisture by ignition type and ecoregion
 tti1<-summaryBy(data=joinz, fm100_m~ig+NA_L3CODE)
@@ -319,6 +324,7 @@ w <- reshape(df1, timevar = "ig", idvar = "NA_L3CODE", v.names = "fm100_m.mean",
 #calculate the difference in fuel moisture in human vs. lightning fires by ecoregion
 w$fmdiffmon<-w$fm100_m.mean.human-w$fm100_m.mean.lightning
 
+#order
 word<-w[with(w, order(-fmdiffmon)), ]
 
 #t-test of the difference fuel moisture in human vs. lightning fires
@@ -329,30 +335,36 @@ t.test(w$fm100_m.mean.human,w$fm100_m.mean.lightning,paired=TRUE)
 ###
 #regression
 
+#fire size vs. fuel moisture
 lm1<-lm(log(ha.mean)~fm100_m.mean, data=dft)
 summary(lm1)
 #p=3.22e-09
 #y=-0.355x+9.4499
 #is significantly (-) related
 
+#fire size vs. wind speed
 lm1<-lm(log(ha.mean)~mnwind_m.mean, data=dft)
 summary(lm1)
 #p=9.99e-05
 #y=-1.465x+10.4702
 #is significantly (-) related
 
+#fire size vs. fuel moisture; eastern ecoregions
 lm1<-lm(log(ha.mean)~fm100_m.mean, data=east)
 summary(lm1)
 #p=0.05; (+)
 
+#fire size vs. fuel moisture; western ecoregions
 lm2<-lm(log(ha.mean)~fm100_m.mean, data=west)
 summary(lm2)
 #p=0.0005; (-)
 
-
+#fire size vs. wind speed; eastern ecoregions
 lm3<-lm(log(ha.mean)~mnwind_m.mean, data=east)
 summary(lm3)
 #p=0.17
+
+#fire size vs. wind speed; western ecoregions
 lm4<-lm(log(ha.mean)~mnwind_m.mean, data=west)
 summary(lm4)
 #p=0.93
@@ -385,14 +397,18 @@ write.table(wwssd, "/Users/rana7082/Dropbox/ecoregions/derived/diff_sdwind_NA_L3
 
 
 ###
+#summary of fire size by ecoregion and ignition
 lll<-as.data.frame(summaryBy(ha~NA_L3CODE+ig,data=joinz, FUN=mean))
 wid<-cast(lll, NA_L3CODE ~ ig, value = 'ha.mean')
 write.table(wid, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
+#summary of number fire events by ecoregion and ignition
 hhh<-as.data.frame(summaryBy(FOD_ID~NA_L3CODE+ig,data=joinz,FUN=length))
 wider<-cast(hhh, NA_L3CODE ~ ig, value = 'FOD_ID.length')
+head(wider)
 write.table(wider, "/Users/rana7082/Dropbox/ecoregions/derived/nobs_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
+#summary of fire size by ecoregion only
 uuu<-as.data.frame(summaryBy(ha~NA_L3CODE,data=joinz, FUN=mean))
 write.table(uuu, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_10.csv", sep=",", row.names=FALSE, append=FALSE)
 
