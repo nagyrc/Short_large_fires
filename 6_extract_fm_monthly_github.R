@@ -78,7 +78,6 @@ ggplot(joinz, aes(x = ig, y = mnwind_m,fill=ig)) +
 
 ###
 #break fuel moisture and wind speed into discrete bins
-
 #fm vs wind speed of large human-caused fires; figure 5a in manuscript
 p <- ggplot(hub, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
   geom_bin2d(bins = 20)+
