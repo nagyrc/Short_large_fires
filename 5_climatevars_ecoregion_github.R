@@ -1,10 +1,5 @@
 #this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
 #skip to line 214 to re-open and plot
-#need to update masterord.csv with updated Short data
-#updated 11/3/16
-
-#need to update the perh.csv file (do this in script-shortyseasons_lev3_101916.R, then come back to line 191 here)
-#updated 11/10/16
 
 library("ncdf4")
 library(raster)
@@ -14,20 +9,14 @@ library(GISTools)
 library(ggplot2)
 library(doBy)
 library(plyr)
+library(dplyr)
 
 
 #################################
 #bring in fm, light, and fire data
-setwd("/Users/rana7082/Dropbox/ecoregions/derived/")
-setwd("C:/Users/rnagy/Dropbox/ecoregions/derived/")
+masterord <- as.data.frame(read.csv("data/merged/masterord_update.csv"))
 
-masterordtab <- read.csv("masterord_update.csv")
-head(masterordtab)
-
-masterord<-as.data.frame(masterordtab)
-head(masterord)
-
-#copy
+#make a copy
 keeps<-masterord
 
 
@@ -35,45 +24,29 @@ keeps<-masterord
 #################################
 #bring in centroids that have linked ecoregions
 #this file below was made in Arc using a join (right click on layer) of the reprojected fishnet-centroids-conus.shp with the level 3 ecoregion shapefile
-fcent_ecn <- readOGR(dsn="C:/Users/rnagy/Documents/CU_Boulder/US_fire/fcent_ecn.shp", 
-                     layer="fcent_ecn")
-
-fcent_ecn <- readOGR(dsn="/Users/rana7082/Dropbox/ecoregions/derived/fcent_ecn.shp", 
-                     layer="fcent_ecn")
-
-head(fcent_ecn)
+fcent_ecn <- readOGR(dsn="data/bounds/centroids/fcent_ecn.shp", layer="fcent_ecn")
 
 
 #pull data
 xx<-fcent_ecn@data
 
-head(xx)
-
 xxdf<-as.data.frame(xx)
-head(xxdf)
 
 
 #####################################
-
-
 #add ecn to dataframe by matching X50k_ID
 keeps$ecocode = xxdf[match(keeps$X50k_ID, xxdf$X50k_ID),"NA_L3CODE"] 
 keeps$econame = xxdf[match(keeps$X50k_ID, xxdf$X50k_ID),"NA_L3NAME"] 
-head(keeps)
-#yay, this worked!
 
 #bind back to masterord
 masterord$ecocode = keeps[match(masterord$X50k_ID, keeps$X50k_ID),"ecocode"]
 masterord$econame = keeps[match(masterord$X50k_ID, keeps$X50k_ID),"econame"] 
 
-head(masterord)
-#now plot
-
 
 ########################################################################################################################
 ####################
+#maybe don't need this (lines 49-59)
 #export table for re-opening and plotting
-
 write.table(masterord, "/Users/rana7082/Dropbox/ecoregions/masterord_update_w_ecn.csv", sep=",", row.names=FALSE)
 
 #to re-open for plotting 
