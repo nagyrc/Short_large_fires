@@ -17,38 +17,31 @@ read<- read.csv("data/merged/Short_large10_FM_Wind.csv")
 
 #the format of NA_L3CODE is formatted incorrectly, so remove that field
 read$NA_L3CODE<-NULL
-head(read)
 
 #bring in something else that can make key from
 readz<- read.csv("data/fire/Short_large10.csv")
 
+#create the key
 key<-unique(readz[c("NA_L3CODE","NA_L3NAME")])
 
 joinz<-left_join(read,key,by=c('NA_L3NAME'))
 head(joinz)
 #this now has a correct field for NA_L3CODE
 
-tt3<-unique(joinz$NA_L3CODE)
+#tt3<-unique(joinz$NA_L3CODE)
 
 #subset just large human or just large lightning fires
 hub<-joinz[which(joinz$STAT_CAU_1!="Lightning"),]
 lub<-joinz[which(joinz$STAT_CAU_1=="Lightning"),]
 
-
-#split into east and west US
+#split ecoregions into east and west US
 region<-as.data.frame(read.csv("data/bounds/ecoregion/east_west/arc_map_regions.csv"))
-
-#for ecoregions
-dftt<-left_join(dft,region,by="NA_L3CODE")
-
-east<-dftt[which(dftt$region=="east"),]
-west<-dftt[which(dftt$region=="west"),]
 
 #for individual fires
 dfttall<-left_join(joinz,region,by="NA_L3CODE")
 
-east<-dfttall[which(dfttall$region=="east"),]
-west<-dfttall[which(dfttall$region=="west"),]
+eastall<-dfttall[which(dfttall$region=="east"),]
+westall<-dfttall[which(dfttall$region=="west"),]
 
 #bring in fire size data by ecoregion (made in Script XXXXX)
 fireha<-as.data.frame(read.csv("data/fire/fireha_10.csv"))
@@ -56,27 +49,7 @@ fireha$ecn<-as.numeric(gsub("[.]","",fireha$NA_L3CODE))
 
 ##########################################################
 #manuscript figures
-#box and whisker plot for each variable (fuel moisture or wind speed by ignition type)
-#fuel moisture; figure 5c
-ggplot(joinz, aes(x = ig, y = fm100_m,fill=ig)) +
-  geom_boxplot()+
-  scale_fill_manual(values = c("red", "blue"))+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  labs(y="100 hr fuel moisture",x="ignition")+
-  coord_flip()
 
-#wind speed; figure 5d
-ggplot(joinz, aes(x = ig, y = mnwind_m,fill=ig)) +
-  geom_boxplot()+
-  scale_fill_manual(values = c("red", "blue"))+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  labs(y="wind speed",x="ignition")
-
-
-
-###
 #break fuel moisture and wind speed into discrete bins
 #fm vs wind speed of large human-caused fires; figure 5a in manuscript
 p <- ggplot(hub, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
@@ -108,11 +81,34 @@ p <- ggplot(lub, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,
   theme(plot.title = element_text(size=20))
 p
 
+
+
+###
+#box and whisker plot for each variable (fuel moisture or wind speed by ignition type)
+#fuel moisture; figure 5c
+ggplot(joinz, aes(x = ig, y = fm100_m,fill=ig)) +
+  geom_boxplot()+
+  scale_fill_manual(values = c("red", "blue"))+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  labs(y="100 hr fuel moisture",x="ignition")+
+  coord_flip()
+
+#wind speed; figure 5d
+ggplot(joinz, aes(x = ig, y = mnwind_m,fill=ig)) +
+  geom_boxplot()+
+  scale_fill_manual(values = c("red", "blue"))+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  labs(y="wind speed",x="ignition")
+
+
+
 ###
 #try a discrete bin figure for each ecoregion
 #human-caused large fires; this is Fig. S7a
 
-p <- ggplot(hub2, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000))))+
+p <- ggplot(hub, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000))))+
   geom_bin2d(bins = 20)+
   scale_fill_manual("count", values = c("gray90","gray70", "gray50", "red","red4"))+
   xlim(0,30)+
@@ -125,9 +121,9 @@ p <- ggplot(hub2, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000
   #theme(axis.text=element_text(size=12),axis.title=element_text(size=16),legend.text=element_text(size=12),legend.title=element_text(size=12))+
   #theme(plot.title = element_text(size=16))+
   facet_wrap(~NA_L3CODE)+
-  theme(panel.margin.y = unit(-1.8, "lines"))+
+  #theme(panel.margin.y = unit(-1.8, "lines"))+
   theme(strip.background = element_blank())+
-  theme(panel.margin.x = unit(0.2, "lines"))
+  #theme(panel.margin.x = unit(0.2, "lines"))
 p
 
 
@@ -145,13 +141,33 @@ p <- ggplot(lub, aes(fm100_m, mnwind_m, fill=cut(..count.., c(0,2,5,50,500,5000)
   #theme(axis.text=element_text(size=12),axis.title=element_text(size=16),legend.text=element_text(size=12),legend.title=element_text(size=12))+
   #theme(plot.title = element_text(size=16))+
   facet_wrap(~NA_L3CODE)+
-  theme(panel.margin.y = unit(-0.7, "lines"))+
+  #theme(panel.margin.y = unit(-0.7, "lines"))+
   theme(strip.background = element_blank())+
-  theme(panel.margin.x = unit(0.2, "lines"))
+  #theme(panel.margin.x = unit(0.2, "lines"))
 p
 
 
+
 ###
+#prep for Fig. 7
+#calculate mean fuel moisture vs. mean fire size by ecoregion
+tt1<-summaryBy(fm100_m~NA_L3CODE,data=joinz,FUN=c(mean))
+tt2<-summaryBy(mnwind_m~NA_L3CODE,data=joinz,FUN=c(mean))
+
+#join summary tables
+dfa <- merge(tt1,tt2,by=c("NA_L3CODE"))
+
+#output for later use
+write.table(dfa, "C:/Users/rnagy/Dropbox/ecoregions/derived/fm_ws_monthly_ecn.csv", sep=",", row.names=FALSE, append=FALSE)
+
+#join table of fire size and fuel moisture, wind speed by ecoregion
+dft<-left_join(dfa,fireha,by="NA_L3CODE")
+
+#join tables and subset
+dftt<-left_join(dft,region,by="NA_L3CODE")
+east<-dftt[which(dftt$region=="east"),]
+west<-dftt[which(dftt$region=="west"),]
+
 #fuel moisture vs. fire size for east and west; Fig. 7a
 p16 <- ggplot(data = dftt, aes(y = log(ha.mean), x = fm100_m.mean,color=region)) + 
   geom_point() +
@@ -201,7 +217,7 @@ ggplot(joinz,aes(x=log(ha)+1)) +
 #summary statistics for large fires (mean, median, min, and max fire size) by ecoregion
 sum1<-summaryBy(data=read, ha~NA_L3NAME, FUN=c(length,mean, median,min, max))
 
-#for Table S1
+#for Table S1 in manuscript
 write.table(sum1, "C:/Users/rnagy/Dropbox/ecoregions/derived/fireha_ecn_stats.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #summary of mean fire size by ignition and ecoregion
@@ -229,9 +245,7 @@ summary(read$ig)
 
 #summary stats of large fire summed burned area by ignition and ecoregion
 sum66<-summaryBy(data=joinz, ha~ig+NA_L3CODE, FUN=c(sum))
-
 w<-reshape(sum66,timevar="ig",idvar="NA_L3CODE",v.names="ha.sum",direction="wide")
-
 write.table(w, "C:/Users/rnagy/Dropbox/ecoregions/derived/burned_area_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
@@ -263,7 +277,6 @@ std.error(hub$mnwind_m)
 #0.00198
 std.error(lub$mnwind_m)
 #0.003566
-
 
 
 
@@ -308,7 +321,6 @@ w$fmdiffmon<-w$fm100_m.mean.human-w$fm100_m.mean.lightning
 
 word<-w[with(w, order(-fmdiffmon)), ]
 
-
 #t-test of the difference fuel moisture in human vs. lightning fires
 t.test(w$fm100_m.mean.human,w$fm100_m.mean.lightning,paired=TRUE)
 #p=7.039e-06
@@ -316,20 +328,6 @@ t.test(w$fm100_m.mean.human,w$fm100_m.mean.lightning,paired=TRUE)
 
 ###
 #regression
-#calculate mean fuel moisture vs. mean fire size by ecoregion
-tt1<-summaryBy(fm100_m~NA_L3CODE,data=joinz,FUN=c(mean))
-tt2<-summaryBy(mnwind_m~NA_L3CODE,data=joinz,FUN=c(mean))
-
-#join summary tables
-dfa <- merge(tt1,tt2,by=c("NA_L3CODE"))
-
-#output for later use
-write.table(dfa, "C:/Users/rnagy/Dropbox/ecoregions/derived/fm_ws_monthly_ecn.csv", sep=",", row.names=FALSE, append=FALSE)
-
-
-#join table of fire size and fuel moisture, wind speed by ecoregion
-dft<-left_join(dfa,fireha,by="NA_L3CODE")
-
 
 lm1<-lm(log(ha.mean)~fm100_m.mean, data=dft)
 summary(lm1)
@@ -360,79 +358,51 @@ summary(lm4)
 #p=0.93
 
 
-#fuel moisture, large fires only
+###
+#to calculate the difference in mean fuel moisture: human vs. lightning; used to make Figure 6a
 r2 <- summaryBy(fm100_m~ig+NA_L3CODE, data=joinz, FUN=mean)
-
-w<-cast(r2, NA_L3CODE ~ ig, value = 'fm100_m.mean')
-
-w$diff_fm10<-w$human-w$lightning
-#where positive human > lightning
-
-#export table to join in Arc
-write.table(w, "/Users/rana7082/Dropbox/ecoregions/derived/diff_fm_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+wfm<-cast(r2, NA_L3CODE ~ ig, value = 'fm100_m.mean')
+wfm$diff_fm10<-w$human-w$lightning
+#note, where positive human > lightning
+write.table(wfm, "/Users/rana7082/Dropbox/ecoregions/derived/diff_fm_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+#this data was added to shapefile in Arc
 
 
-#mean wind speed, large fires only
+#to calculate the difference in mean wind speed: human vs. lightning; used to make Figure 6b
 r3 <- summaryBy(mnwind_m~ig+NA_L3CODE, data=joinz, FUN=mean)
-
-w<-cast(r3, NA_L3CODE ~ ig, value = 'mnwind_m.mean')
-
-w$diff_windspeed<-w$human-w$lightning
-
-write.table(w, "/Users/rana7082/Dropbox/ecoregions/derived/diff_wind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+wws<-cast(r3, NA_L3CODE ~ ig, value = 'mnwind_m.mean')
+wws$diff_windspeed<-w$human-w$lightning
+write.table(wws, "/Users/rana7082/Dropbox/ecoregions/derived/diff_wind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+#this data was added to shapefile in Arc
 
 
-
-#std wind speed, large fires only
+#to calculate the difference in the standard deviation of wind speed: human vs. lightning
+#standard deviation of wind speed; not reported in manuscript
 r4 <- summaryBy(stdwind_m~ig+NA_L3CODE, data=joinz, FUN=mean)
-
-w<-cast(r4, NA_L3CODE ~ ig, value = 'stdwind_m.mean')
-
-w$diff_sdwindspeed<-w$human-w$lightning
-
-write.table(w, "/Users/rana7082/Dropbox/ecoregions/derived/diff_sdwind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+wwssd<-cast(r4, NA_L3CODE ~ ig, value = 'stdwind_m.mean')
+wwssd$diff_sdwindspeed<-w$human-w$lightning
+write.table(wwssd, "/Users/rana7082/Dropbox/ecoregions/derived/diff_sdwind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
-
+###
 lll<-as.data.frame(summaryBy(ha~NA_L3CODE+ig,data=joinz, FUN=mean))
-
 wid<-cast(lll, NA_L3CODE ~ ig, value = 'ha.mean')
-
 write.table(wid, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
-
 hhh<-as.data.frame(summaryBy(FOD_ID~NA_L3CODE+ig,data=joinz,FUN=length))
-
 wider<-cast(hhh, NA_L3CODE ~ ig, value = 'FOD_ID.length')
-
 write.table(wider, "/Users/rana7082/Dropbox/ecoregions/derived/nobs_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
-
-
 uuu<-as.data.frame(summaryBy(ha~NA_L3CODE,data=joinz, FUN=mean))
-
 write.table(uuu, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_10.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
-
+###
 #stats with median
 tti2<-summaryBy(data=joinz, ha~ig+NA_L3CODE, FUN=median)
-
 df2<-as.data.frame(tti2)
-
-#w <- reshape(l.sort, timevar = "subj", idvar = c("id", "female", "race", "ses", "schtyp", "prog"), direction = "wide")
 w2 <- reshape(df2, timevar = "ig", idvar = "NA_L3CODE", v.names = "ha.median", direction = "wide")
-
 write.table(w2, "C:/Users/rnagy/Dropbox/ecoregions/derived/firehamed_10hl.csv", sep=",", row.names=FALSE, append=FALSE)
-
-
-tti3<-summaryBy(data=joinz, ha~NA_L3CODE, FUN=median)
-df3<-as.data.frame(tti3)
-
-#for Table S1
-write.table(df3, "C:/Users/rnagy/Dropbox/ecoregions/derived/firehamed_10.csv", sep=",", row.names=FALSE, append=FALSE)
-
-
 
 
 
