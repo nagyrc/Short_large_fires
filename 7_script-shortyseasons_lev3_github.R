@@ -12,6 +12,7 @@ library(tibble)
 #updated Short data and joined with ecoregion data
 slim<-as.data.frame(read.csv("data/merged/updatedShort_w_eco_slim3.csv"))
 
+#make new column of ecoregion number to easily index
 slim$ecn<-as.character(gsub("\\.","",slim$NA_L3CODE))
 slim$ecn<-as.numeric(slim$ecn)
 
