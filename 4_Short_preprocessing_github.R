@@ -31,21 +31,21 @@ proj_ll <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 
 #Import the USA States layer
 #usa_shp <- st_read(dsn = paste0("data/raw/conus"),
-                   #layer = "cb_2016_us_state_20m", quiet= TRUE) %>%
-  #st_transform(., proj_ea) %>%
-  #subset(., NAME != "Alaska" &
-           #NAME != "Hawaii" &
-           #NAME != "Puerto Rico") %>%
-  #mutate(area_m2 = as.numeric(st_area(geometry)),
-         #StArea_km2 = area_m2/1000000,
-         #group = 1) %>%
-  #st_simplify(., preserveTopology = TRUE) 
+#layer = "cb_2016_us_state_20m", quiet= TRUE) %>%
+#st_transform(., proj_ea) %>%
+#subset(., NAME != "Alaska" &
+#NAME != "Hawaii" &
+#NAME != "Puerto Rico") %>%
+#mutate(area_m2 = as.numeric(st_area(geometry)),
+#StArea_km2 = area_m2/1000000,
+#group = 1) %>%
+#st_simplify(., preserveTopology = TRUE) 
 #plot(usa_shp[5])
 
 # Dissolve to the USA Boundary
 #conus <- usa_shp %>%
-  #group_by(group) %>%
-  #st_union()
+#group_by(group) %>%
+#st_union()
 #plot(conus)
 
 # Import the Level 3 Ecoregions
@@ -59,7 +59,7 @@ plot(ecoreg[2])
 
 # Intersects states with ecoregions
 #state_eco <- st_intersection(usa_shp, ecoreg) %>%
-  #dplyr::select(STUSPS, NAME, StArea_km2, US_L3CODE, US_L3NAME, EcoArea_km2, NA_L2NAME, NA_L1CODE, NA_L1NAME, geometry)
+#dplyr::select(STUSPS, NAME, StArea_km2, US_L3CODE, US_L3NAME, EcoArea_km2, NA_L2NAME, NA_L1CODE, NA_L1NAME, geometry)
 #plot(state_eco[2])
 
 
@@ -416,26 +416,39 @@ writeSpatialShape(shrt_clim_bio, "data/merged/shrt_clim_bio.shp")
 ###
 
 
-#Add ecoregion
+
+##################################
+#Add ecoregion to Short data and join with other data
+fire_eco <- st_intersection(shrt_fire, ecoreg)
+#this runs forever
+
+fire_eco_df <-as.data.frame(fire_eco) %>% 
+  dplyr::select("clean_id", "NA_L3CODE","NA_L3NAME","NA_L1CODE","NA_L1NAME","EcoArea_km2")
+
+#join with shrt_clim_bio
+shrt_clim_bio_eco <- left_join(shrt_clim_bio, fire_eco_df, by = "clean_id")
 
 
+##################################
 # Import biophysical setting ---------------------------------------------
 bps.ref <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 bps <- raster(paste0("data/raw/us_130bps/grid/us_130bps"))
 #bps_trans <- st_transform(bps, proj_ea)
 
-#Nate's code
+#Nate's code to transform and extract
 shrt_bps <- shrt_fire %>%
   st_transform(., bps.ref)
-shrt_bps <- raster::extract(bps, as(shrt_bps, "Spatial"), sp = TRUE)
+shrt_bps <- raster::extract(bps, as(shrt_fire, "Spatial"), sp = TRUE)
 shrt_bps <- st_transform(shrt_bps, proj_ea)
+#this runs forever
 
-#My code
-#extract bps to short data
-shrt_bps <- raster::extract(bps_trans, as(shrt_fire, "Spatial"), sp = TRUE)
 #convert to dataframe
+#change variable name here to bps variable name (instead of biomass)
 shrt_bps_df <-as.data.frame(shrt_bps) %>% 
   dplyr::select("clean_id", "NBCD_countrywide_biomass_mosaic")
+
+#join with shrt_wind_fm
+shrt_clim_veg_eco <- left_join(shrt_clim_bio_eco, shrt_bps, by = "clean_id")
 
 
 
@@ -445,6 +458,7 @@ shrt_bps_df <-as.data.frame(shrt_bps) %>%
 
 
 ######################
+#do not need below????
 #need to join shrt_veg , shrt_wind, shrt_fm plus ecoreg to one master dataset with all extracted variables
 #start with shrt_wind and shrt_fm
 #try left_join.sf
@@ -494,14 +508,14 @@ shrt_clm<-st_join(shrt_wind_df, shrt_fm_df, left = TRUE, by = "FPA_ID")
 
 # Subset the FPA data to large fires (90th%tile) ---------------------------------------
 cl <- makeCluster(UseCores)
-lrg_shrt_fire <- foreach(i = 1:NROW(shrt_fire)) %dopar% {
-  st_intersection(shrt_fire[i], ecoreg)} das
+lrg_shrt_fire <- foreach(i = 1:NROW(shrt_clim_veg_eco)) %dopar% {
+  st_intersection(shrt_clim_veg_eco[i], ecoreg)} das
 stopCluster(cl)
 
 tt3<-unique(lrg_shrt_fire$L3CODE)
 output=NULL
 for (i in tt3) {
-  subby<-shrt_fire[shrt_fire$L3CODE==i,]
+  subby<-shrt_clim_veg_eco[shrt_clim_veg_eco$L3CODE==i,]
   ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.90))
-  output<-rbind(output,data.frame(ninety[,]))
+  outputy<-rbind(outputy,data.frame(ninety[,]))
 }
