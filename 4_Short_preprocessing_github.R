@@ -406,8 +406,15 @@ shrt_bio_df <-as.data.frame(shrt_bio) %>%
 #join with shrt_wind_fm
 shrt_clim_bio <- left_join(shrt_wind_fm, shrt_bio_df, by = "clean_id")
 
+###
 #output in case bps crashes it
+#this did not work
 write.table(shrt_clim_bio, "data/merged/shrt_clim_bio.csv", sep=",", row.names=FALSE)
+#this did not work
+library(maptools)
+writeSpatialShape(shrt_clim_bio, "data/merged/shrt_clim_bio.shp")
+###
+
 
 
 # Import biophysical setting ---------------------------------------------
