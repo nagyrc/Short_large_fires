@@ -386,15 +386,28 @@ shrt_fm <- fm_jan %>%
 #make into a dataframe
 shrt_fm_df <- as.data.frame(shrt_fm) 
 # %>% dplyr::select("FPA_ID", "fm", "clean_id", "NA_L3NAME")
- 
+
+
+#merge wind, fm, Short
+shrt_wind_fm <- left_join(shrt_wind_df, shrt_fm_df, by = "clean_id")
+head(shrt_wind_fm)
 
 ##################################
 # Import biomass data ----------------------------------------------------
 bio <- raster(paste0("data/raw/NBCD_countrywide_biomass_mosaic/NBCD_countrywide_biomass_mosaic.tif"))
 
 # extract biomass to short data
-shrt_veg <- raster::extract(bio, as(shrt_fire, "Spatial"), sp = TRUE)
+shrt_bio <- raster::extract(bio, as(shrt_fire, "Spatial"), sp = TRUE)
 
+#convert to dataframe
+shrt_bio_df <-as.data.frame(shrt_bio) %>% 
+  dplyr::select("clean_id", "NBCD_countrywide_biomass_mosaic")
+
+#join with shrt_wind_fm
+shrt_clim_bio <- left_join(shrt_wind_fm, shrt_bio_df, by = "clean_id")
+
+#output in case bps crashes it
+write.table(shrt_clim_bio, "data/merged/shrt_clim_bio.csv", sep=",", row.names=FALSE)
 
 
 # Import biophysical setting ---------------------------------------------
