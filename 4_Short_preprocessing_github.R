@@ -416,15 +416,26 @@ writeSpatialShape(shrt_clim_bio, "data/merged/shrt_clim_bio.shp")
 ###
 
 
+#Add ecoregion
+
 
 # Import biophysical setting ---------------------------------------------
-bps <- raster(paste0("data/raw/us_130bps/grid/us_130bps"))
 bps.ref <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+bps <- raster(paste0("data/raw/us_130bps/grid/us_130bps"))
+#bps_trans <- st_transform(bps, proj_ea)
+
+#Nate's code
 shrt_bps <- shrt_fire %>%
   st_transform(., bps.ref)
 shrt_bps <- raster::extract(bps, as(shrt_bps, "Spatial"), sp = TRUE)
 shrt_bps <- st_transform(shrt_bps, proj_ea)
-#this never stops running
+
+#My code
+#extract bps to short data
+shrt_bps <- raster::extract(bps_trans, as(shrt_fire, "Spatial"), sp = TRUE)
+#convert to dataframe
+shrt_bps_df <-as.data.frame(shrt_bps) %>% 
+  dplyr::select("clean_id", "NBCD_countrywide_biomass_mosaic")
 
 
 
