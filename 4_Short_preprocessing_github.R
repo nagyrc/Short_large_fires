@@ -78,6 +78,22 @@ shrt_fire <- st_read(dsn = paste0("data/raw/fpa-fod/Data/FPA_FOD_20170508.gdb"),
          DISCOVERY_MONTH = month(DISCOVERY_DATE),
          DISCOVERY_YEAR = FIRE_YEAR)
 
+# add a column to indicate whether the fire id (FPA_ID) is duplicated
+shrt_fire <- shrt_fire %>%
+  mutate(is_id_duplicated = duplicated(FPA_ID))
+
+stopifnot(sum(shrt_fire$is_id_duplicated) == 3)
+
+# ensure that duplicated fire ids get modified to be unique
+shrt_fire <- shrt_fire %>%
+  mutate(row_id = 1:n(), 
+         clean_id = ifelse(is_id_duplicated, 
+                           paste(FPA_ID, row_id, sep = "_"), 
+                           FPA_ID)) %>%
+  dplyr::select(-row_id)
+
+# verify that clean_id is a unique identifier (no repeats)
+stopifnot(!any(duplicated(shrt_fire$clean_id)))
 
 
 #Extract average monthly wind data to Short ------------------------------------------------
@@ -402,6 +418,34 @@ shrt_veg <- raster::extract(bio, as(shrt_bps, "Spatial"), sp = TRUE)
 #this did not work
 shrt_wind_fm <- left_join.sf(shrt_wind, shrt_fm_df, by = "FPA_ID")
 shrt_wind_fm <- left_join.sf(shrt_wind, shrt_fm_df, by = "FPA_ID")
+
+# check for NA values in the input data frames
+mean(is.na(shrt_wind_df$Wind))
+mean(is.na(shrt_fm_df$fm))
+
+# convert the sf object to a data frame, then try to merge
+merged <- shrt_wind_df %>%
+  left_join(shrt_fm_df)
+
+View(merged)
+
+any(duplicated(merged$FPA_ID))
+any(duplicated(shrt_wind_df$FPA_ID))
+any(duplicated(shrt_fm_df$FPA_ID))
+
+shrt_wind_df[duplicated(shrt_wind_df$FPA_ID), ]
+
+shrt_wind_df %>%
+  filter(FPA_ID == "ICS209_2009_KS-DDQ-128")
+
+merged %>%
+  filter(FPA_ID == "ICS209_2009_KS-DDQ-128")
+
+
+all(unique(shrt_wind_df$FPA_ID) == unique(shrt_fm_df$FPA_ID))
+all(levels(shrt_wind$FPA_ID) == levels(shrt_fm_df$FPA_ID))
+
+
 
 #try st_join
 #this did not work
