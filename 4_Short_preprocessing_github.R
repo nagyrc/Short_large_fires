@@ -386,6 +386,8 @@ shrt_bps <- st_transform(shrt_bps, proj_ea)
 
 # Import biomass data ----------------------------------------------------
 bio <- raster(paste0("data/raw/NBCD_countrywide_biomass_mosaic/NBCD_countrywide_biomass_mosaic.tif"))
+
+#combine biomass and biophysical setting
 #need bps to stop running before this next step
 shrt_veg <- raster::extract(bio, as(shrt_bps, "Spatial"), sp = TRUE)
 
