@@ -1,6 +1,6 @@
 #this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
 # Here we import, project, intersect, organize data layers
-# Key layers are the Short ignitions, level 3 ecoregions
+# Key layers are the Short ignitions, level 3 ecoregions, mean monthly wind speed, mean monthly fuel moisture, biomass, and biophysical setting
 
 # Libraries ---------------------------------------------------------------
 library(tidyverse)
@@ -240,7 +240,7 @@ str(shrt_wind)
 
 #make into a data frame
 shrt_wind_df <- as.data.frame(shrt_wind) %>%
-  dplyr::select("FPA_ID", "Wind")
+  dplyr::select("clean_id", "Wind")
 
 
 #Extract average monthly fuel moisture data to Short ------------------------------------------------
@@ -384,12 +384,19 @@ shrt_fm <- fm_jan %>%
   bind_rows(., fm_dec) 
 
 #make into a dataframe
-shrt_fm_df <- as.data.frame(shrt_fm) %>%
-  dplyr::select("FPA_ID", "fm")
-
-
+shrt_fm_df <- as.data.frame(shrt_fm) 
+# %>% dplyr::select("FPA_ID", "fm", "clean_id", "NA_L3NAME")
+ 
 
 ##################################
+# Import biomass data ----------------------------------------------------
+bio <- raster(paste0("data/raw/NBCD_countrywide_biomass_mosaic/NBCD_countrywide_biomass_mosaic.tif"))
+
+# extract biomass to short data
+shrt_veg <- raster::extract(bio, as(shrt_fire, "Spatial"), sp = TRUE)
+
+
+
 # Import biophysical setting ---------------------------------------------
 bps <- raster(paste0("data/raw/us_130bps/grid/us_130bps"))
 bps.ref <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
@@ -400,12 +407,7 @@ shrt_bps <- st_transform(shrt_bps, proj_ea)
 #this never stops running
 
 
-# Import biomass data ----------------------------------------------------
-bio <- raster(paste0("data/raw/NBCD_countrywide_biomass_mosaic/NBCD_countrywide_biomass_mosaic.tif"))
 
-#combine biomass and biophysical setting
-#need bps to stop running before this next step
-shrt_veg <- raster::extract(bio, as(shrt_bps, "Spatial"), sp = TRUE)
 
 
 
