@@ -236,7 +236,6 @@ shrt_wind <- wind_jan %>%
   bind_rows(., wind_nov) %>%
   bind_rows(., wind_dec)
 
-str(shrt_wind)
 
 #make into a data frame
 shrt_wind_df <- as.data.frame(shrt_wind) %>%
