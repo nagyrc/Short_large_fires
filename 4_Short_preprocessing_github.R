@@ -419,7 +419,7 @@ writeSpatialShape(shrt_clim_bio, "data/merged/shrt_clim_bio.shp")
 ##################################
 #Add ecoregion to Short data and join with other data
 fire_eco <- st_intersection(shrt_fire, ecoreg)
-#this runs forever
+#this runs forever; when it stops it is missing observations; n = 1832837
 
 fire_eco_df <-as.data.frame(fire_eco) %>% 
   dplyr::select("clean_id", "NA_L3CODE","NA_L3NAME","NA_L1CODE","NA_L1NAME","EcoArea_km2")
@@ -432,19 +432,25 @@ shrt_clim_bio_eco <- left_join(shrt_clim_bio, fire_eco_df, by = "clean_id")
 # Import biophysical setting ---------------------------------------------
 bps.ref <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 bps <- raster(paste0("data/raw/us_130bps/grid/us_130bps"))
+names(bps)
+#need to extract the GROUPVEG variable from the bps raster
+bps2<-bps$GROUPVEG
+bps2<-bps[[12]]
+bps2<-us_130bps$GROUPVEG
+str(bps)
 #bps_trans <- st_transform(bps, proj_ea)
 
 #Nate's code to transform and extract
 shrt_bps <- shrt_fire %>%
   st_transform(., bps.ref)
-shrt_bps <- raster::extract(bps, as(shrt_fire, "Spatial"), sp = TRUE)
+#should this next line have shrt_bps in the extract function rather than shrt_fire???
+shrt_bps <- raster::extract(bps, as(shrt_bps, "Spatial"), sp = TRUE)
 shrt_bps <- st_transform(shrt_bps, proj_ea)
-#this runs forever
+#this takes a long time to run, but appears to work- it just pulled the wrong variable from bps
 
 #convert to dataframe
-#change variable name here to bps variable name (instead of biomass)
 shrt_bps_df <-as.data.frame(shrt_bps) %>% 
-  dplyr::select("clean_id", "NBCD_countrywide_biomass_mosaic")
+  dplyr::select("clean_id", "GROUPVEG")
 
 #join with shrt_wind_fm
 shrt_clim_veg_eco <- left_join(shrt_clim_bio_eco, shrt_bps, by = "clean_id")
