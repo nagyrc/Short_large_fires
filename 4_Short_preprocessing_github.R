@@ -475,17 +475,27 @@ shrt_clim_veg <- left_join(shrt_clim_bio, shrt_bps3, by = "clean_id")
 fire_eco <- st_intersection(shrt_fire, ecoreg)
 #this takes a long time to run; when it stops it is missing observations; n = 1832837
 1835386-1832837
-#
+#2549
+2549/1835386*100
+#0.1388
+summary(fire_eco$NA_L1NAME)
 
+#check which ones are missing
+??st_difference
+st_difference(fire_eco,shrt_fire)
+
+#convert to dataframe
 fire_eco_df <-as.data.frame(fire_eco) %>% 
   dplyr::select("clean_id", "NA_L3CODE","NA_L3NAME","NA_L1CODE","NA_L1NAME","EcoArea_km2")
 
 #join with shrt_clim_bio
 shrt_clim_veg_eco <- left_join(shrt_clim_veg, fire_eco_df, by = "clean_id")
+#this should contain everything!
 
 
-
-
+#total nobs=
+#human nobs=
+#lightning nobs=
 
 
 
