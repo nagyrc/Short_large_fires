@@ -477,6 +477,27 @@ shrt_clim_veg_eco <- left_join(shrt_clim_veg, fire_eco_df, by = "clean_id")
 
 
 
+###########################################################
+# Subset the FPA data to large fires (90th%tile) ---------------------------------------
+#was this used to join ecoreg?
+cl <- makeCluster(UseCores)
+lrg_shrt_fire <- foreach(i = 1:NROW(shrt_clim_veg_eco)) %dopar% {
+  st_intersection(shrt_clim_veg_eco[i], ecoreg)} das
+stopCluster(cl)
+
+#make large fire subset
+tt3<-unique(shrt_clim_veg_eco$NA_L3CODE)
+outputy=NULL
+for (i in tt3) {
+  subby<-shrt_clim_veg_eco[shrt_clim_veg_eco$NA_L3CODE==i,]
+  ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.90))
+  outputy<-rbind(outputy,data.frame(ninety[,]))
+}
+
+
+
+
+
 ######################
 #do not need below????
 #need to join shrt_veg , shrt_wind, shrt_fm plus ecoreg to one master dataset with all extracted variables
@@ -520,24 +541,3 @@ shrt_clm<-st_join(shrt_wind, shrt_fm_df, left = TRUE, by = "FPA_ID")
 shrt_clm<-st_join(shrt_wind, shrt_fm, left = TRUE)
 shrt_clm<-st_join(shrt_wind_df, shrt_fm_df, left = TRUE, by = "FPA_ID")
 ######################
-
-
-
-
-
-
-# Subset the FPA data to large fires (90th%tile) ---------------------------------------
-#was this used to join ecoreg?
-cl <- makeCluster(UseCores)
-lrg_shrt_fire <- foreach(i = 1:NROW(shrt_clim_veg_eco)) %dopar% {
-  st_intersection(shrt_clim_veg_eco[i], ecoreg)} das
-stopCluster(cl)
-
-#make large fire subset
-tt3<-unique(shrt_clim_veg_eco$NA_L3CODE)
-outputy=NULL
-for (i in tt3) {
-  subby<-shrt_clim_veg_eco[shrt_clim_veg_eco$NA_L3CODE==i,]
-  ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.90))
-  outputy<-rbind(outputy,data.frame(ninety[,]))
-}
