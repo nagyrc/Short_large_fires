@@ -441,21 +441,33 @@ shrt_bps <- raster::extract(bps, as(shrt_bps, "Spatial"), sp = TRUE)
 #this takes a long time to run, but appears to work (correct number of observations)- it just pulled the wrong variable from bps
 shrt_bps <- st_transform(shrt_bps, proj_ea)
 
+head(shrt_bps)
+summary(shrt_bps$us_130bps)
 dataonly<-bps@data@attributes[[1]] 
 #%>% str
 head(dataonly)
+summary(dataonly$ID)
 
-shrt_bps2<-left_join(shrt_bps,dataonly, by="ID")
-#convert to dataframe
-#this should work after "GROUPVEG" has been selected
-shrt_bps_df <-as.data.frame(shrt_bps2) %>% 
-  dplyr::select("clean_id", "GROUPVEG")
+names(dataonly)[names(dataonly)=="ID"] <- "us_130bps"
+
+
+shrt_bps2<-left_join(shrt_bps_df,dataonly, by="us_130bps")
+#df[,c("A","B","E")]
+shrt_bps3<-shrt_bps2[,c("clean_id","us_130bps","GROUPVEG")]
 
 #join with shrt_wind_fm
-shrt_clim_veg <- left_join(shrt_clim_bio, shrt_bps_df, by = "clean_id")
-#or
-shrt_clim_veg <- left_join(shrt_clim_bio, shrt_bps2, by = "clean_id")
+shrt_clim_veg <- left_join(shrt_clim_bio, shrt_bps3, by = "clean_id")
 
+###
+#or
+
+#convert to dataframe
+#this should work after "GROUPVEG" has been selected
+#shrt_bps_df <-as.data.frame(shrt_bps) %>% 
+  #dplyr::select("clean_id", "us_130bps")
+
+#shrt_clim_veg <- left_join(shrt_clim_bio, shrt_bps_df, by = "clean_id")
+###
 
 
 ##################################
