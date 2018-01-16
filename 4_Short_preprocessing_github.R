@@ -434,7 +434,7 @@ bps.ref <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0
 bps <- raster(paste0("data/raw/us_130bps/grid/us_130bps"))
 names(bps)
 str(bps)
-summary(bps)
+#summary(bps)
 #need to extract the GROUPVEG variable from the bps raster
 #none of these below worked
 bps2<-bps$GROUPVEG
@@ -451,6 +451,7 @@ shrt_bps <- st_transform(shrt_bps, proj_ea)
 #this takes a long time to run, but appears to work (correct number of observations)- it just pulled the wrong variable from bps
 
 #convert to dataframe
+#this should work after "GROUPVEG" has been selected
 shrt_bps_df <-as.data.frame(shrt_bps) %>% 
   dplyr::select("clean_id", "GROUPVEG")
 
