@@ -438,8 +438,8 @@ shrt_bps <- shrt_fire %>%
   st_transform(., bps.ref)
 #should this next line have shrt_fire in the extract function rather than shrt_bps???
 shrt_bps <- raster::extract(bps, as(shrt_bps, "Spatial"), sp = TRUE)
-shrt_bps <- st_transform(shrt_bps, proj_ea)
 #this takes a long time to run, but appears to work (correct number of observations)- it just pulled the wrong variable from bps
+shrt_bps <- st_transform(shrt_bps, proj_ea)
 
 dataonly<-bps@data@attributes[[1]] 
 #%>% str
