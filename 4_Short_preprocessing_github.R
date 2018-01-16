@@ -443,6 +443,7 @@ shrt_bps <- st_transform(shrt_bps, proj_ea)
 
 dataonly<-bps@data@attributes[[1]] 
 #%>% str
+head(dataonly)
 
 shrt_bps2<-left_join(shrt_bps,dataonly, by="ID")
 #convert to dataframe
@@ -526,15 +527,17 @@ shrt_clm<-st_join(shrt_wind_df, shrt_fm_df, left = TRUE, by = "FPA_ID")
 
 
 # Subset the FPA data to large fires (90th%tile) ---------------------------------------
+#was this used to join ecoreg?
 cl <- makeCluster(UseCores)
 lrg_shrt_fire <- foreach(i = 1:NROW(shrt_clim_veg_eco)) %dopar% {
   st_intersection(shrt_clim_veg_eco[i], ecoreg)} das
 stopCluster(cl)
 
-tt3<-unique(lrg_shrt_fire$L3CODE)
-output=NULL
+#make large fire subset
+tt3<-unique(shrt_clim_veg_eco$NA_L3CODE)
+outputy=NULL
 for (i in tt3) {
-  subby<-shrt_clim_veg_eco[shrt_clim_veg_eco$L3CODE==i,]
+  subby<-shrt_clim_veg_eco[shrt_clim_veg_eco$NA_L3CODE==i,]
   ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.90))
   outputy<-rbind(outputy,data.frame(ninety[,]))
 }
