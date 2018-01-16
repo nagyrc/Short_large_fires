@@ -433,12 +433,14 @@ shrt_clim_bio_eco <- left_join(shrt_clim_bio, fire_eco_df, by = "clean_id")
 bps.ref <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 bps <- raster(paste0("data/raw/us_130bps/grid/us_130bps"))
 names(bps)
+str(bps)
+summary(bps)
 #need to extract the GROUPVEG variable from the bps raster
 #none of these below worked
 bps2<-bps$GROUPVEG
 bps2<-bps[[12]]
 bps2<-us_130bps$GROUPVEG
-str(bps)
+
 
 #Nate's code to transform and extract
 shrt_bps <- shrt_fire %>%
