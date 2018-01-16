@@ -12,6 +12,7 @@ library(lubridate)
 library(ncdf4)
 library(doParallel)
 library(foreach) 
+library(doBy)
 
 # To be used in the parallelized sections of the code
 UseCores <- detectCores() -1
@@ -489,16 +490,19 @@ fire_eco_df <-as.data.frame(fire_eco) %>%
   dplyr::select("clean_id", "NA_L3CODE","NA_L3NAME","NA_L1CODE","NA_L1NAME","EcoArea_km2")
 
 #join with shrt_clim_bio
-shrt_clim_veg_eco <- left_join(shrt_clim_veg, fire_eco_df, by = "clean_id")
+#shrt_clim_veg_eco <- left_join(shrt_clim_veg, fire_eco_df, by = "clean_id")
+shrt_clim_veg_eco <-plyr::join(shrt_clim_veg, fire_eco_df, by = "clean_id", type = "inner", match = "all")
 #this should contain everything!
+#nobs=1832837
 
+#total nobs=1832837
+tt1<-summaryBy(clean_id~IGNITION,data=shrt_clim_veg_eco,FUN=c(length))
+tt1
+#human nobs=1558632
+#lightning nobs=274205
+1558632+274205
 
-#total nobs=
-#human nobs=
-#lightning nobs=
-
-
-
+all_fires<-shrt_clim_veg_eco
 ###########################################################
 # Subset the FPA data to large fires (90th%tile) ---------------------------------------
 #was this used to join ecoreg?
@@ -508,12 +512,12 @@ lrg_shrt_fire <- foreach(i = 1:NROW(shrt_clim_veg_eco)) %dopar% {
 stopCluster(cl)
 
 #make large fire subset
-tt3<-unique(shrt_clim_veg_eco$NA_L3CODE)
-outputy=NULL
+tt3<-unique(all_fires$NA_L3CODE)
+lrg_fires=NULL
 for (i in tt3) {
-  subby<-shrt_clim_veg_eco[shrt_clim_veg_eco$NA_L3CODE==i,]
+  subby<-all_fires[all_fires$NA_L3CODE==i,]
   ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.90))
-  outputy<-rbind(outputy,data.frame(ninety[,]))
+  lrg_fires<-rbind(lrg_fires,data.frame(ninety[,]))
 }
 
 
