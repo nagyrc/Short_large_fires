@@ -419,7 +419,7 @@ writeSpatialShape(shrt_clim_bio, "data/merged/shrt_clim_bio.shp")
 ##################################
 #Add ecoregion to Short data and join with other data
 fire_eco <- st_intersection(shrt_fire, ecoreg)
-#this runs forever; when it stops it is missing observations; n = 1832837
+#this takes a long time to run; when it stops it is missing observations; n = 1832837
 
 fire_eco_df <-as.data.frame(fire_eco) %>% 
   dplyr::select("clean_id", "NA_L3CODE","NA_L3NAME","NA_L1CODE","NA_L1NAME","EcoArea_km2")
@@ -443,10 +443,10 @@ str(bps)
 #Nate's code to transform and extract
 shrt_bps <- shrt_fire %>%
   st_transform(., bps.ref)
-#should this next line have shrt_bps in the extract function rather than shrt_fire???
+#should this next line have shrt_fire in the extract function rather than shrt_bps???
 shrt_bps <- raster::extract(bps, as(shrt_bps, "Spatial"), sp = TRUE)
 shrt_bps <- st_transform(shrt_bps, proj_ea)
-#this takes a long time to run, but appears to work (correct nobs)- it just pulled the wrong variable from bps
+#this takes a long time to run, but appears to work (correct number of observations)- it just pulled the wrong variable from bps
 
 #convert to dataframe
 shrt_bps_df <-as.data.frame(shrt_bps) %>% 
