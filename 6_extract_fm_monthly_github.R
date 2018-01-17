@@ -301,7 +301,7 @@ std.error(hub$fm)
 std.error(lub$fm)
 #0.022
 
-
+#stopped here Wed afternoon...these means are not working.
 #stats for wind speed
 mean(hub$Wind)
 #3.96
