@@ -551,47 +551,4 @@ for (i in tt3) {
 #nobs=392937
 
 
-######################
-#do not need below????
-#need to join shrt_veg , shrt_wind, shrt_fm plus ecoreg to one master dataset with all extracted variables
-#start with shrt_wind and shrt_fm
-#try left_join.sf
-#this did not work
-shrt_wind_fm <- left_join.sf(shrt_wind, shrt_fm_df, by = "FPA_ID")
-shrt_wind_fm <- left_join.sf(shrt_wind, shrt_fm_df, by = "FPA_ID")
-
-# check for NA values in the input data frames
-mean(is.na(shrt_wind_df$Wind))
-mean(is.na(shrt_fm_df$fm))
-
-# convert the sf object to a data frame, then try to merge
-merged <- shrt_wind_df %>%
-  left_join(shrt_fm_df)
-
-View(merged)
-
-any(duplicated(merged$FPA_ID))
-any(duplicated(shrt_wind_df$FPA_ID))
-any(duplicated(shrt_fm_df$FPA_ID))
-
-shrt_wind_df[duplicated(shrt_wind_df$FPA_ID), ]
-
-shrt_wind_df %>%
-  filter(FPA_ID == "ICS209_2009_KS-DDQ-128")
-
-merged %>%
-  filter(FPA_ID == "ICS209_2009_KS-DDQ-128")
-
-
-all(unique(shrt_wind_df$FPA_ID) == unique(shrt_fm_df$FPA_ID))
-all(levels(shrt_wind$FPA_ID) == levels(shrt_fm_df$FPA_ID))
-
-
-
-#try st_join
-#this did not work
-shrt_clm<-st_join(shrt_wind, shrt_fm_df, left = TRUE, by = "FPA_ID")
-shrt_clm<-st_join(shrt_wind, shrt_fm, left = TRUE)
-shrt_clm<-st_join(shrt_wind_df, shrt_fm_df, left = TRUE, by = "FPA_ID")
-######################
 
