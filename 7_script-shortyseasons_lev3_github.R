@@ -12,7 +12,7 @@ library(tibble)
 #updated Short data and joined with ecoregion data
 #slim<-as.data.frame(read.csv("data/merged/updatedShort_w_eco_slim3.csv"))
 
-
+#this has the geometry field removed
 lrg_fires<- read.csv("data/merged/lrg_fires.csv")
 keep<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR!="Missing/Undefined"),]
 
@@ -21,10 +21,10 @@ keep$ecn<-as.character(gsub("\\.","",keep$NA_L3CODE))
 keep$ecn<-as.numeric(keep$ecn)
 head(keep)
 
-#create FIRE_SIZE_ha here
+#update FIRE_SIZE_ha here
+keep$FIRE_SIZE_ha<-keep$FIRE_SIZE_m2*0.0001
 summary(keep$FIRE_SIZE_ha)
-####need to convert ha; need to divide by 10000 instead of multiply by 10000
-#*****do this first
+
 
 #check to make sure no water ecoregions
 #subz <- subset(keep, keep$ecn != 000)
@@ -75,7 +75,7 @@ fff<-merge(output,tt9,by="ecn")
 head(fff)
 
 #output table; used to make Table S1
-write.table(fff, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE)
+write.table(fff, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 
@@ -104,7 +104,6 @@ for (i in tt33) {
 colnames(outputh) <- c("ecn", "hnobs", "hmean","hsd","hmedian","hsum")
 row.names(outputh)<-NULL
 head(outputh)
-#these numbers look really big
 
 summary(hmean)
 
@@ -129,6 +128,7 @@ output2<-merge(outputh,outputl,by="ecn")
 
 #calculate the total number of fires of all ignitions
 output2$totfires<-output2$hnobs+output2$lnobs
+output2
 
 #calculate the percent of human ignitions by ecoregion
 output2$perh<-output2$hnobs/output2$totfires*100
@@ -136,14 +136,14 @@ output2$perh<-output2$hnobs/output2$totfires*100
 #put NA_L3CODE back in to join easily in Arc
 #tt9<-unique(subz[c("ecn", "NA_L3CODE")])
 jjj<-left_join(output2,tt9,by="ecn")
-
+jjj
 #output table; used to make Figure 1
-write.table(jjj, "/Users/rana7082/Dropbox/ecoregions/derived/firehasum_ecn_top_ten_Short_update_hl.csv", sep=",", row.names=FALSE)
+write.table(jjj, "results/firehasum_ecn_top_ten_Short_update_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #what is the range of percent human started fires by ecoregion?
 summary(jjj$perh)
-#min=15.76, 6.2.15, Idaho Batholith; lowest
-#max=99.58, 11.1.2, Central CA Valley; highest
+#min=12.50
+#max=100.00
 
 
 ################################################
@@ -167,10 +167,11 @@ summary(jjj$perh)
 #eco.legend <- subset(eco.legend, eco.legend$ecn != 000 & is.na(eco.legend$ecn) == FALSE)
 #eco.legend <- eco.legend[order(eco.legend$ecn),]
 
-r3 <- summaryBy(OBJECTID~DISCOVERY1+ig, data=outputy, FUN=length)
+head(keep)
+r3 <- summaryBy(clean_id~DISCOVERY_DOY+IGNITION, data=keep, FUN=length)
 
 # fire season of large fires, for all ecoregions
-wide <- reshape(r3,v.names="OBJECTID.length", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
+wide <- reshape(r3,v.names="clean_id.length", idvar="IGNITION", timevar="DISCOVERY_DOY", direction="wide") #change number here 
 wide[is.na(wide)] <- 0
 
 w <- wide[,2:length(wide)]
@@ -189,58 +190,67 @@ barplot(r2m, beside=T, horiz=F, legend=T, col=c("red", "blue"),
 #check to make sure correct # obs
 yyy<-rowSums(r2m[,])
 head(yyy)
-130346+30641
-#160987, but should be 160608
+142276+32946
+#175222
 ################################################
 #median day of year for large human and lightning fires
-r4 <- summaryBy(DISCOVERY1~ig, data=outputy, FUN=median)
+r4 <- summaryBy(DISCOVERY_DOY~IGNITION, data=keep, FUN=median)
 r4
-#median doy for human fires = 118, median doy for lightning fires = 204
+#median doy for human fires = 118, median doy for lightning fires = 205
 
 
-r4.1<-summaryBy(DISCOVERY1~ig+NA_L3CODE, data=outputy, FUN=median)
+r4.1<-summaryBy(DISCOVERY_DOY~IGNITION+NA_L3CODE, data=keep, FUN=median)
 r4.1
 #this gives the median day of year for human and lightning by ecoregion
 
 #output table
-write.table(r4.1, "C:/Users/rnagy/Dropbox/ecoregions/derived/meddoyhl.csv", sep=",", row.names=FALSE)
+write.table(r4.1, "results/meddoyhl.csv", sep=",", row.names=FALSE, append=FALSE)
 ################################################
 
 
 #stats about what is large human fire season vs. large lightning fire season
-hsub<-subset(outputy,outputy$ig=="human")
-lsub<-subset(outputy,outputy$ig=="lightning")
+hub<-keep[which(keep$IGNITION=="Human"),]
+#142276
+lub<-keep[which(keep$IGNITION=="Lightning"),]
+#32946
 
-twofive<-quantile(hsub$DISCOVERY1, 0.25)
+twofive<-quantile(hub$DISCOVERY_DOY, 0.25)
 twofive
-#76
-sevenfive<-quantile(hsub$DISCOVERY1, 0.75)
-#222
+#75
+sevenfive<-quantile(hub$DISCOVERY_DOY, 0.75)
+sevenfive
+#221
 
-twofive<-quantile(lsub$DISCOVERY1, 0.25)
-#177
-sevenfive<-quantile(lsub$DISCOVERY1, 0.75)
+twofive<-quantile(lub$DISCOVERY_DOY, 0.25)
+twofive
+#178
+sevenfive<-quantile(lub$DISCOVERY_DOY, 0.75)
+sevenfive
 #226
 
 
-j2.5<-quantile(lsub$DISCOVERY1, 0.025)
-#104
-j97.5<-quantile(lsub$DISCOVERY1, 0.975)
+j2.5<-quantile(lub$DISCOVERY_DOY, 0.025)
+j2.5
+#103
+j97.5<-quantile(lub$DISCOVERY_DOY, 0.975)
+j97.5
 #267
 
 #number of large human-caused fires outside of lightning fire season
-out<-hsub[ which(hsub$DISCOVERY1>267| hsub$DISCOVERY1 < 104), ]
-#74,704; this is reported in manuscript
+out<-hub[ which(hub$DISCOVERY_DOY>267| hub$DISCOVERY_DOY < 103), ]
+out
+#80896; need to report this in the manuscript
 
 #number of human-caused large fires outside of lightning fire season by ecoregion
-r66 <- summaryBy(OBJECTID~NA_L3CODE, data=out, FUN=nobs)
+r66 <- summaryBy(clean_id~NA_L3CODE, data=out, FUN=length)
 r66
 
 #output table
-write.table(r66, "/Users/rana7082/Dropbox/ecoregions/derived/non_light_season.csv", sep=",", row.names=FALSE)
+write.table(r66, "results/non_light_season.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 #########################################
+#stopped here Tues night
 #split into east and west US; Figure 3a; Figure 3b
 region<-as.data.frame(read.csv("data/bounds/ecoregion/east_west/arc_map_regions.csv"))
 
