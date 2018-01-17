@@ -340,24 +340,33 @@ barplot(r6m, beside=T, horiz=F, legend=T, col=c("red", "blue"),
 #seasonal correlations of large fires with fires of all sizes for east and west (by region)
 #number of fires by Julian day of year
 #human ignitions only
-outputhrr<-outputrr[outputrr$ig=="human",]
 
-#large human-caused fires only
-r8 <- summaryBy(OBJECTID~DISCOVERY1+region, data=outputhrr, FUN=nobs)
+#large fires only
+#join region to large fires
+lrg_fires_rr<-left_join(keep,region,by="NA_L3CODE")
+
+#subset the human caused fires only
+lrghrr<-lrg_fires_rr[lrg_fires_rr$IGNITION=="Human",]
+
+r8 <- summaryBy(clean_id~DISCOVERY_DOY+region, data=lrghrr, FUN=length)
 head(r8)
 
 #fires of all sizes
-subzrr<-left_join(subz,region,by="NA_L3CODE")
-head(subzrr)
+#join region to all fires
+all_fires_rr<-left_join(all_fires,region,by="NA_L3CODE")
 
-#subset for human-caused fires of all sizes only
-subzhrr<-subzrr[subzrr$ig=="human",]
+#exclude those with unknown cause
+all_fires_known<-all_fires_rr[which(all_fires_rr$STAT_CAUSE_DESCR!="Missing/Undefined"),]
+#1698835
 
-r9 <- summaryBy(OBJECTID~DISCOVERY1+region, data=subzhrr, FUN=nobs)
+#subset the human caused fires only
+allhrr<-all_fires_known[all_fires_known$IGNITION=="Human",]
+
+r9 <- summaryBy(clean_id~DISCOVERY_DOY+region, data=allhrr, FUN=length)
 head(r9)
 
 #join together
-lll<-merge(r8,r9, by=c("DISCOVERY1","region"))
+lll<-merge(r8,r9, by=c("DISCOVERY_DOY","region"))
 head(lll)
 lll
 
@@ -367,13 +376,13 @@ names(lll)[4]<-"all"
 
 tempw<-subset(lll, lll$region == "west")
 cor(tempw$large,tempw$all)
-#r=0.9309
+#r=0.9366
 summary(lm(large~all, data=tempw))
 #p<2e-16
 
 tempe<-subset(lll, lll$region == "east")
 cor(tempe$large,tempe$all)
-#r=0.988
+#r=0.9891
 summary(lm(large~all, data=tempe))
 #p<2e-16
 #these numbers are reported in the manuscript
