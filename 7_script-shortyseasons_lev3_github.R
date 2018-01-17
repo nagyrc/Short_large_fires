@@ -21,6 +21,7 @@ keep$ecn<-as.character(gsub("\\.","",keep$NA_L3CODE))
 keep$ecn<-as.numeric(keep$ecn)
 head(keep)
 
+#create FIRE_SIZE_ha here
 summary(keep$FIRE_SIZE_ha)
 ####need to convert ha; need to divide by 10000 instead of multiply by 10000
 #*****do this first
