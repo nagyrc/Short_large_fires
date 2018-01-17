@@ -12,36 +12,46 @@ library(stats)
 library(plotrix)
 
 #bring in Short data with fm and ws extracted
-#note, this has large fires only
-read<- read.csv("data/merged/Short_large10_FM_Wind.csv")
+#note, this has large fires only (top 10%)
+lrg_fires<- read.csv("data/merged/lrg_fires.csv")
+head(read)
 
 #the format of NA_L3CODE is formatted incorrectly, so remove that field
-read$NA_L3CODE<-NULL
+#read$NA_L3CODE<-NULL
 
 #bring in something else that can make key from
-readz<- read.csv("data/fire/Short_large10.csv")
+#readz<- read.csv("data/fire/Short_large10.csv")
 
 #create the key
-key<-unique(readz[c("NA_L3CODE","NA_L3NAME")])
+#key<-unique(readz[c("NA_L3CODE","NA_L3NAME")])
 
-joinz<-left_join(read,key,by=c('NA_L3NAME'))
-head(joinz)
+#joinz<-left_join(read,key,by=c('NA_L3NAME'))
+#head(joinz)
 #this now has a correct field for NA_L3CODE
 
 #tt3<-unique(joinz$NA_L3CODE)
 
 #subset just large human or just large lightning fires
-hub<-joinz[which(joinz$STAT_CAU_1!="Lightning"),]
-lub<-joinz[which(joinz$STAT_CAU_1=="Lightning"),]
+summary(lrg_fires$STAT_CAUSE_DESCR)
+15414/190636*100
+#8.08%
+
+keep<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR!="Missing/Undefined"),]
+190636-15414
+#175222
+hub<-keep[which(keep$STAT_CAUSE_DESCR!="Lightning"),]
+#142276
+lub<-keep[which(keep$STAT_CAUSE_DESCR=="Lightning"),]
+#32946
 
 #split ecoregions into east and west US
 region<-as.data.frame(read.csv("data/bounds/ecoregion/east_west/arc_map_regions.csv"))
 
 #for individual fires
-dfttall<-left_join(joinz,region,by="NA_L3CODE")
+lrg_reg<-left_join(keep,region,by="NA_L3CODE")
 
-eastall<-dfttall[which(dfttall$region=="east"),]
-westall<-dfttall[which(dfttall$region=="west"),]
+eastall<-lrg_reg[which(lrg_reg$region=="east"),]
+westall<-lrg_reg[which(lrg_reg$region=="west"),]
 
 #bring in fire size data by ecoregion (made in Script XXXXX)
 fireha<-as.data.frame(read.csv("data/fire/fireha_10.csv"))
