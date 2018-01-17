@@ -144,7 +144,7 @@ tt33<-unique(keep$ecn)
 #write.table(jjj, "results/firehasum_ecn_top_ten_Short_update_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #what is the range of percent human started fires by ecoregion?
-summary(jjj$perh)
+#summary(jjj$perh)
 #min=12.50
 #max=100.00
 
