@@ -127,21 +127,21 @@ tt33<-unique(keep$ecn)
 
 
 #merge two dataframes together
-output2<-merge(outputh,outputl,by="ecn")
+#output2<-merge(outputh,outputl,by="ecn")
 
 #calculate the total number of fires of all ignitions
-output2$totfires<-output2$hnobs+output2$lnobs
-output2
+#output2$totfires<-output2$hnobs+output2$lnobs
+#output2
 
 #calculate the percent of human ignitions by ecoregion
-output2$perh<-output2$hnobs/output2$totfires*100
+#output2$perh<-output2$hnobs/output2$totfires*100
 
 #put NA_L3CODE back in to join easily in Arc
 #tt9<-unique(subz[c("ecn", "NA_L3CODE")])
-jjj<-left_join(output2,tt9,by="ecn")
-jjj
+#jjj<-left_join(output2,tt9,by="ecn")
+#jjj
 #output table; used to make Figure 1
-write.table(jjj, "results/firehasum_ecn_top_ten_Short_update_hl.csv", sep=",", row.names=FALSE, append=FALSE)
+#write.table(jjj, "results/firehasum_ecn_top_ten_Short_update_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #what is the range of percent human started fires by ecoregion?
 summary(jjj$perh)

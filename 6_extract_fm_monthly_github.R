@@ -249,12 +249,20 @@ sum2b<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(mean))
 sum2b
 
 wa<-reshape(sum2a,timevar="IGNITION",idvar="NA_L3CODE",v.names="FIRE_SIZE_ha.length",direction="wide")
-wb<-reshape(sum2b,timevar="IGNITION",idvar="NA_L3CODE",v.names="ha.mean",direction="wide")
+wb<-reshape(sum2b,timevar="IGNITION",idvar="NA_L3CODE",v.names="FIRE_SIZE_ha.mean",direction="wide")
 
-output2<-merge(outputh,outputl,by="ecn")
+output2<-merge(wa,wb,by="NA_L3CODE")
+output2
 
+colnames(output2) <- c("NA_L3CODE", "hnobs", "lnobs","hhamean","lhamean")
 #for figures in manuscript???
-write.table(sum1, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
+
+output2$totfires<-output2$hnobs+output2$lnobs
+output2$perh<-output2$hnobs/output2$totfires*100
+zzz<-left_join(output2,tt9,by="NA_L3CODE")
+head(zzz)
+#to make Figure 1
+write.table(zzz, "results/firehasum_ecn_top_ten_Short_update_hl.csv.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 #t-test of mean size of large human fires vs. large lightning fires
