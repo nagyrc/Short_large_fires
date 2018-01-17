@@ -506,10 +506,10 @@ all_fires<-shrt_clim_veg_eco
 ###########################################################
 # Subset the FPA data to large fires (90th%tile) ---------------------------------------
 #was this used to join ecoreg?
-cl <- makeCluster(UseCores)
-lrg_shrt_fire <- foreach(i = 1:NROW(shrt_clim_veg_eco)) %dopar% {
-  st_intersection(shrt_clim_veg_eco[i], ecoreg)} das
-stopCluster(cl)
+#cl <- makeCluster(UseCores)
+#lrg_shrt_fire <- foreach(i = 1:NROW(shrt_clim_veg_eco)) %dopar% {
+  #st_intersection(shrt_clim_veg_eco[i], ecoreg)} das
+#stopCluster(cl)
 
 #make large fire subset
 tt3<-unique(all_fires$NA_L3CODE)
