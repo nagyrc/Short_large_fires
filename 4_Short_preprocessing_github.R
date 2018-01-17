@@ -407,14 +407,7 @@ shrt_bio_df <-as.data.frame(shrt_bio) %>%
 shrt_clim_bio <- left_join(shrt_wind_fm, shrt_bio_df, by = "clean_id")
 
 class(shrt_clim_bio)
-###
-#output in case bps crashes it
-#this did not work
-write.table(shrt_clim_bio, "data/merged/shrt_clim_bio.csv", sep=",", row.names=FALSE)
-#this did not work
-library(maptools)
-writeSpatialShape(shrt_clim_bio, "data/merged/shrt_clim_bio.shp")
-###
+
 
 
 
@@ -503,6 +496,19 @@ tt1
 1558632+274205
 
 all_fires<-shrt_clim_veg_eco
+class(all_fires)
+
+###
+#output for later use with season
+#for a csv file, you have to remove the geometry field
+all_firesng<-subset(all_fires, select=-c(geometry))
+write.table(all_firesng, "data/merged/all_fires.csv", sep=",", row.names=FALSE, append=FALSE)
+
+#could also output a shp?
+#this did not work
+library(maptools)
+writeSpatialShape(all_fires, "data/merged/all_fires.shp")
+###
 ###########################################################
 # Subset the FPA data to large fires (90th%tile) ---------------------------------------
 #was this used to join ecoreg?
@@ -519,9 +525,30 @@ for (i in tt3) {
   ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.90))
   lrg_fires<-rbind(lrg_fires,data.frame(ninety[,]))
 }
+#nobs=190636
+
+#output .csv file for use in later scripts
+lrg_firesng<-subset(lrg_fires, select=-c(geometry))
+write.table(lrg_firesng, "data/merged/lrg_fires.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
+######################
+#for sensitivity analysis; try also 95% and 80%
+lrg_fires95=NULL
+for (i in tt3) {
+  subby<-all_fires[all_fires$NA_L3CODE==i,]
+  ninetyfive<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.95))
+  lrg_fires95<-rbind(lrg_fires95,data.frame(ninetyfive[,]))
+}
+#nobs=96739
 
+lrg_fires80=NULL
+for (i in tt3) {
+  subby<-all_fires[all_fires$NA_L3CODE==i,]
+  eighty<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.80))
+  lrg_fires80<-rbind(lrg_fires80,data.frame(eighty[,]))
+}
+#nobs=392937
 
 
 ######################
