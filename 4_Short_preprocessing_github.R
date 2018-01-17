@@ -74,7 +74,7 @@ shrt_fire <- st_read(dsn = paste0("data/raw/fpa-fod/Data/FPA_FOD_20170508.gdb"),
   mutate(IGNITION = ifelse(STAT_CAUSE_DESCR == "Lightning", "Lightning", "Human"),
          FIRE_SIZE_m2 = FIRE_SIZE*4046.86,
          FIRE_SIZE_km2 = FIRE_SIZE_m2/1000000,
-         FIRE_SIZE_ha = FIRE_SIZE_m2*10000,
+         FIRE_SIZE_ha = FIRE_SIZE_m2*0.0001,
          DISCOVERY_DAY = day(DISCOVERY_DATE),
          DISCOVERY_MONTH = month(DISCOVERY_DATE),
          DISCOVERY_YEAR = FIRE_YEAR)
@@ -503,6 +503,10 @@ class(all_fires)
 #for a csv file, you have to remove the geometry field
 head(all_fires)
 all_firesng<-subset(all_fires, select=-c(geometry, FIRE_SIZE_m2, FIRE_SIZE_km2, FIRE_SIZE_ha))
+
+all_firesng$FIRE_SIZE_m2 <- all_firesng$FIRE_SIZE*4046.86
+all_firesng$FIRE_SIZE_ha <-all_firesng$FIRE_SIZE_m2*0.0001
+
 write.table(all_firesng, "data/merged/all_fires.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #could also output a shp?
@@ -530,6 +534,11 @@ for (i in tt3) {
 
 #output .csv file for use in later scripts
 lrg_firesng<-subset(lrg_fires, select=-c(geometry, FIRE_SIZE_m2, FIRE_SIZE_km2, FIRE_SIZE_ha))
+
+lrg_firesng$FIRE_SIZE_m2 <- lrg_firesng$FIRE_SIZE*4046.86
+lrg_firesng$FIRE_SIZE_ha <-lrg_firesng$FIRE_SIZE_m2*0.0001
+
+
 write.table(lrg_firesng, "data/merged/lrg_fires.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
