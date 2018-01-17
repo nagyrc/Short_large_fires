@@ -10,59 +10,71 @@ library(dplyr)
 library(tibble)
 
 #updated Short data and joined with ecoregion data
-slim<-as.data.frame(read.csv("data/merged/updatedShort_w_eco_slim3.csv"))
+#slim<-as.data.frame(read.csv("data/merged/updatedShort_w_eco_slim3.csv"))
+
+
+lrg_fires<- read.csv("data/merged/lrg_fires.csv")
+keep<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR!="Missing/Undefined"),]
 
 #make new column of ecoregion number to easily index
-slim$ecn<-as.character(gsub("\\.","",slim$NA_L3CODE))
-slim$ecn<-as.numeric(slim$ecn)
+keep$ecn<-as.character(gsub("\\.","",keep$NA_L3CODE))
+keep$ecn<-as.numeric(keep$ecn)
+head(keep)
+
+summary(keep$FIRE_SIZE_ha)
+####need to convert ha; need to divide by 10000 instead of multiply by 10000
+#*****do this first
 
 #check to make sure no water ecoregions
-subz <- subset(slim, slim$ecn != 000)
-subz <- subset(slim, slim$ecn != 0)
-subz <- subset(subz, is.na(subz$ecn) == FALSE)
+#subz <- subset(keep, keep$ecn != 000)
+#subz <- subset(keep, keep$ecn != 0)
+#subz <- subset(keep, is.na(keep$ecn) == FALSE)
+#no water, undefined, keep using keep
+#can remove this
 
-tt3<-unique(subz$ecn)
+tt33<-unique(keep$ecn)
 
 #top 10% largest fires only
 #################################
 #to understand what a large fire is in each ecoregion
 #extract top 10% of largest fires from each ecoregion
 #then put back into a dataframe that has all columns
-outputy=NULL
-for (i in tt3) {
-  subby<-subz[subz$ecn==i,]
-  ninety<-subset(subby, ha >= quantile(ha, 0.90))
-  outputy<-rbind(outputy,data.frame(ninety[,]))
-}
+#outputy=NULL
+#for (i in tt3) {
+  #subby<-subz[subz$ecn==i,]
+  #ninety<-subset(subby, ha >= quantile(ha, 0.90))
+  #outputy<-rbind(outputy,data.frame(ninety[,]))
+#}
 
 #output table of large fires
-write.table(outputy, "/Users/rana7082/Dropbox/ecoregions/derived/Short_large10.csv", sep=",", row.names=FALSE)
+#write.table(outputy, "/Users/rana7082/Dropbox/ecoregions/derived/Short_large10.csv", sep=",", row.names=FALSE)
 
 
 ################################
 #top 10% largest fires; summary statistics; reported in Table S1 in manuscript
 #create dataframe of number of fires, mean, sd of fire size by ecoregion (summary columns of the 10% largest fires)
+head(keep)
 output=NULL
 
-for (i in tt3) {
-  subby<-subz[subz$ecn==i,]
-  ninety<-subset(subby, ha >= quantile(ha, 0.9))
-  outty<- c(i,length(ninety$ha),mean(ninety$ha),sd(ninety$ha),median(ninety$ha),sum(ninety$ha))
+for (i in tt33) {
+  subby<-keep[keep$ecn==i,]
+  ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
+  outty<- c(i,length(ninety$FIRE_SIZE_ha),mean(ninety$FIRE_SIZE_ha),sd(ninety$FIRE_SIZE_ha),median(ninety$FIRE_SIZE_ha),sum(ninety$FIRE_SIZE_ha))
   output<-rbind(output,outty)
 }
-
+head(output)
 ###
 
 colnames(output) <- c("ecn", "nobs", "mean","sd","median","sum")
 row.names(output)<-NULL
-output
 
 #add key to this dataframe
+tt9<-unique(keep[c("ecn", "NA_L3CODE")])
 fff<-merge(output,tt9,by="ecn")
 head(fff)
 
 #output table; used to make Table S1
-write.table(fff, "/Users/rana7082/Dropbox/ecoregions/derived/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE)
+write.table(fff, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE)
 
 
 
@@ -77,32 +89,39 @@ write.table(fff, "/Users/rana7082/Dropbox/ecoregions/derived/firehasum_ecn_top_t
 
 #summary statistics on each subset (human and lightning)
 #human subset of large fires only
+head(keep)
 outputh=NULL
 
-for (i in tt3) {
-  subh<-subz[subz$ig!="lightning",]
+for (i in tt33) {
+  subh<-keep[keep$IGNITION=="Human",]
   subbyh<-subh[subh$ecn==i,]
-  ninetyh<-subset(subbyh, ha >= quantile(ha, 0.9))
-  outtyh<- c(i,length(ninetyh$ha),mean(ninetyh$ha),sd(ninetyh$ha),median (ninetyh$ha),sum(ninetyh$ha))
+  ninetyh<-subset(subbyh, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
+  outtyh<- c(i,length(ninetyh$FIRE_SIZE_ha),mean(ninetyh$FIRE_SIZE_ha),sd(ninetyh$FIRE_SIZE_ha),median(ninetyh$FIRE_SIZE_ha),sum(ninetyh$FIRE_SIZE_ha))
   outputh<-rbind(outputh,outtyh)
 }
 
 colnames(outputh) <- c("ecn", "hnobs", "hmean","hsd","hmedian","hsum")
 row.names(outputh)<-NULL
+head(outputh)
+#these numbers look really big
+
+summary(hmean)
 
 #lightning subset of large fires only
 outputl=NULL
 
-for (i in tt3) {
-  subl<-subz[subz$ig=="lightning",]
+for (i in tt33) {
+  subl<-keep[keep$IGNITION=="Lightning",]
   subbyl<-subl[subl$ecn==i,]
-  ninetyl<-subset(subbyl, ha >= quantile(ha, 0.9))
-  outtyl<- c(i,length(ninetyl$ha),mean(ninetyl$ha),sd(ninetyl$ha),median(ninetyl$ha),sum(ninetyl$ha))
+  ninetyl<-subset(subbyl, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
+  outtyl<- c(i,length(ninetyl$FIRE_SIZE_ha),mean(ninetyl$FIRE_SIZE_ha),sd(ninetyl$FIRE_SIZE_ha),median(ninetyl$FIRE_SIZE_ha),sum(ninetyl$FIRE_SIZE_ha))
   outputl<-rbind(outputl,outtyl)
 }
 
 colnames(outputl) <- c("ecn", "lnobs", "lmean","lsd","lmedian","lsum")
 row.names(outputl)<-NULL
+head(outputl)
+
 
 #merge two dataframes together
 output2<-merge(outputh,outputl,by="ecn")
@@ -114,7 +133,7 @@ output2$totfires<-output2$hnobs+output2$lnobs
 output2$perh<-output2$hnobs/output2$totfires*100
 
 #put NA_L3CODE back in to join easily in Arc
-tt9<-unique(subz[c("ecn", "NA_L3CODE")])
+#tt9<-unique(subz[c("ecn", "NA_L3CODE")])
 jjj<-left_join(output2,tt9,by="ecn")
 
 #output table; used to make Figure 1
