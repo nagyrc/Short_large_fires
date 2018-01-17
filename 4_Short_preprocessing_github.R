@@ -501,7 +501,8 @@ class(all_fires)
 ###
 #output for later use with season
 #for a csv file, you have to remove the geometry field
-all_firesng<-subset(all_fires, select=-c(geometry))
+head(all_fires)
+all_firesng<-subset(all_fires, select=-c(geometry, FIRE_SIZE_m2, FIRE_SIZE_km2, FIRE_SIZE_ha))
 write.table(all_firesng, "data/merged/all_fires.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #could also output a shp?
@@ -522,13 +523,13 @@ tt3<-unique(all_fires$NA_L3CODE)
 lrg_fires=NULL
 for (i in tt3) {
   subby<-all_fires[all_fires$NA_L3CODE==i,]
-  ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.90))
+  ninety<-subset(subby, FIRE_SIZE >= quantile(FIRE_SIZE, 0.90))
   lrg_fires<-rbind(lrg_fires,data.frame(ninety[,]))
 }
 #nobs=190636
 
 #output .csv file for use in later scripts
-lrg_firesng<-subset(lrg_fires, select=-c(geometry))
+lrg_firesng<-subset(lrg_fires, select=-c(geometry, FIRE_SIZE_m2, FIRE_SIZE_km2, FIRE_SIZE_ha))
 write.table(lrg_firesng, "data/merged/lrg_fires.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
@@ -537,7 +538,7 @@ write.table(lrg_firesng, "data/merged/lrg_fires.csv", sep=",", row.names=FALSE, 
 lrg_fires95=NULL
 for (i in tt3) {
   subby<-all_fires[all_fires$NA_L3CODE==i,]
-  ninetyfive<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.95))
+  ninetyfive<-subset(subby, FIRE_SIZE >= quantile(FIRE_SIZE, 0.95))
   lrg_fires95<-rbind(lrg_fires95,data.frame(ninetyfive[,]))
 }
 #nobs=96739
@@ -545,7 +546,7 @@ for (i in tt3) {
 lrg_fires80=NULL
 for (i in tt3) {
   subby<-all_fires[all_fires$NA_L3CODE==i,]
-  eighty<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.80))
+  eighty<-subset(subby, FIRE_SIZE >= quantile(FIRE_SIZE, 0.80))
   lrg_fires80<-rbind(lrg_fires80,data.frame(eighty[,]))
 }
 #nobs=392937
