@@ -262,78 +262,76 @@ output2$perh<-output2$hnobs/output2$totfires*100
 zzz<-left_join(output2,tt9,by="NA_L3CODE")
 head(zzz)
 #to make Figure 1
-write.table(zzz, "results/firehasum_ecn_top_ten_Short_update_hl.csv.csv", sep=",", row.names=FALSE, append=FALSE)
+write.table(zzz, "results/firestats_ecn_top_ten_Short_update_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 #t-test of mean size of large human fires vs. large lightning fires
-t.test(w$ha.mean.human,w$ha.mean.lightning,paired=TRUE)
-#p=0.002; lightning fires are sig larger than human fires by ecoregion
+t.test(zzz$hhamean,zzz$lhamean,paired=TRUE)
+#p=0.0013; lightning fires are sig larger than human fires by ecoregion
 
-summary(w$ha.mean.human)
-#mean=285.300 ha
-summary(w$ha.mean.lightning)
-#mean=488.400 ha
+summary(zzz$hhamean)
+#mean=286.486 ha
+summary(zzz$lhamean)
+#mean=504.877 ha
 
-#how many large fires of lightning and human igition?
-summary(read$ig)
-#human=129966, light=30640
-129966+30640
-#160606 total large fires
 
 
 
 #summary stats of large fire summed burned area by ignition and ecoregion
-sum66<-summaryBy(data=keep, ha~ig+NA_L3CODE, FUN=c(sum))
-w<-reshape(sum66,timevar="ig",idvar="NA_L3CODE",v.names="ha.sum",direction="wide")
-write.table(w, "C:/Users/rnagy/Dropbox/ecoregions/derived/burned_area_hl.csv", sep=",", row.names=FALSE, append=FALSE)
+#used to make Fig. S4 with ecoregion area
+sum66<-summaryBy(data=keep, FIRE_SIZE_ha~IGNITION+NA_L3CODE, FUN=c(sum))
+w66<-reshape(sum66,timevar="IGNITION",idvar="NA_L3CODE",v.names="FIRE_SIZE_ha.sum",direction="wide")
+write.table(w66, "results/burned_area_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 
 ###
 #stats for fuel moisture
-mean(hub$fm100_m)
+head(hub)
+mean(hub$fm)
 #14.56
-median(hub$fm100_m)
+median(hub$fm)
 #15.21
-mean(lub$fm100_m)
+mean(lub$fm)
 #11.45
-median(lub$fm100_m)
+median(lub$fm)
 #10.76
-std.error(hub$fm100_m)
+std.error(hub$fm)
 #0.008
-std.error(lub$fm100_m)
+std.error(lub$fm)
 #0.022
 
 
 #stats for wind speed
-mean(hub$mnwind_m)
+mean(hub$Wind)
 #3.96
-median(hub$mnwind_m)
+median(hub$Wind)
 #3.999
-mean(lub$mnwind_m)
+mean(lub$Wind)
 #3.418
-median(lub$mnwind_m)
+median(lub$Wind)
 #3.306
 
-std.error(hub$mnwind_m)
+std.error(hub$Wind)
 #0.00198
-std.error(lub$mnwind_m)
+std.error(lub$Wind)
 #0.003566
 
 
 #stats for standard deviation of wind speed
-mean(hub$stdwind_m)
+#not reported in manuscript
+#mean(hub$stdwind_m)
 #1.479
-median(hub$stdwind_m)
+#median(hub$stdwind_m)
 #1.514
-mean(lub$stdwind_m)
+#mean(lub$stdwind_m)
 #1.1658
-median(lub$stdwind_m)
+#median(lub$stdwind_m)
 #1.12958
 
-std.error(hub$stdwind_m)
+#std.error(hub$stdwind_m)
 #0.000996
-std.error(lub$stdwind_m)
+#std.error(lub$stdwind_m)
 #0.00172
 
 
