@@ -231,16 +231,31 @@ ggplot(keep,aes(x=log(FIRE_SIZE_ha)+1)) +
 
 #stopped here
 #summary statistics for large fires (mean, median, min, and max fire size) by ecoregion
-sum1<-summaryBy(data=read, ha~NA_L3NAME, FUN=c(length,mean, median,min, max))
+sum1<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3NAME, FUN=c(length,mean, sd, median,min, max))
 
 #for Table S1 in manuscript
-write.table(sum1, "C:/Users/rnagy/Dropbox/ecoregions/derived/fireha_ecn_stats.csv", sep=",", row.names=FALSE, append=FALSE)
+write.table(sum1, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #summary of mean fire size by ignition and ecoregion
-sum2<-summaryBy(data=read, ha~ig+NA_L3NAME, FUN=c(mean))
+#sum2<-summaryBy(data=keep, FIRE_SIZE_ha~IGNITION+NA_L3NAME, FUN=c(mean))
 
 #tranform this to wide, then do paired t=test
-w<-reshape(sum2,timevar="ig",idvar="NA_L3NAME",v.names="ha.mean",direction="wide")
+#w<-reshape(sum2,timevar="ig",idvar="NA_L3NAME",v.names="ha.mean",direction="wide")
+
+sum2a<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(length))
+sum2a
+
+sum2b<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(mean))
+sum2b
+
+wa<-reshape(sum2a,timevar="IGNITION",idvar="NA_L3CODE",v.names="FIRE_SIZE_ha.length",direction="wide")
+wb<-reshape(sum2b,timevar="IGNITION",idvar="NA_L3CODE",v.names="ha.mean",direction="wide")
+
+output2<-merge(outputh,outputl,by="ecn")
+
+#for figures in manuscript???
+write.table(sum1, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
+
 
 #t-test of mean size of large human fires vs. large lightning fires
 t.test(w$ha.mean.human,w$ha.mean.lightning,paired=TRUE)

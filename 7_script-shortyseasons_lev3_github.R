@@ -54,29 +54,31 @@ tt33<-unique(keep$ecn)
 ################################
 #top 10% largest fires; summary statistics; reported in Table S1 in manuscript
 #create dataframe of number of fires, mean, sd of fire size by ecoregion (summary columns of the 10% largest fires)
-head(keep)
-output=NULL
+#head(keep)
+#output=NULL
 
 #this is not correct; keep has already been subset to the top 10% fires
-for (i in tt33) {
-  subby<-keep[keep$ecn==i,]
-  ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
-  outty<- c(i,length(ninety$FIRE_SIZE_ha),mean(ninety$FIRE_SIZE_ha),sd(ninety$FIRE_SIZE_ha),median(ninety$FIRE_SIZE_ha),sum(ninety$FIRE_SIZE_ha))
-  output<-rbind(output,outty)
-}
-head(output)
+#for (i in tt33) {
+  #subby<-keep[keep$ecn==i,]
+  #ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
+  #outty<- c(i,length(ninety$FIRE_SIZE_ha),mean(ninety$FIRE_SIZE_ha),sd(ninety$FIRE_SIZE_ha),median(ninety$FIRE_SIZE_ha),sum(ninety$FIRE_SIZE_ha))
+  #output<-rbind(output,outty)
+#}
+#head(output)
 ###
 
-colnames(output) <- c("ecn", "nobs", "mean","sd","median","sum")
-row.names(output)<-NULL
+#colnames(output) <- c("ecn", "nobs", "mean","sd","median","sum")
+#row.names(output)<-NULL
 
 #add key to this dataframe
-tt9<-unique(keep[c("ecn", "NA_L3CODE")])
-fff<-merge(output,tt9,by="ecn")
-head(fff)
+#tt19<-unique(keep[c("ecn", "NA_L3CODE")])
+#sum1<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3NAME, FUN=c(length,mean, sd, median,min, max))
+#sum1
+#fff<-merge(tt20,tt19,by="ecn")
+#head(fff)
 
-#output table; used to make Table S1
-write.table(fff, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
+#output table; this is Table S1
+#write.table(sum1, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 
@@ -91,37 +93,37 @@ write.table(fff, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.
 
 #summary statistics on each subset (human and lightning)
 #human subset of large fires only
-head(keep)
-outputh=NULL
+#head(keep)
+#outputh=NULL
 
-for (i in tt33) {
-  subh<-keep[keep$IGNITION=="Human",]
-  subbyh<-subh[subh$ecn==i,]
-  ninetyh<-subset(subbyh, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
-  outtyh<- c(i,length(ninetyh$FIRE_SIZE_ha),mean(ninetyh$FIRE_SIZE_ha),sd(ninetyh$FIRE_SIZE_ha),median(ninetyh$FIRE_SIZE_ha),sum(ninetyh$FIRE_SIZE_ha))
-  outputh<-rbind(outputh,outtyh)
-}
+#for (i in tt33) {
+  #subh<-keep[keep$IGNITION=="Human",]
+  #subbyh<-subh[subh$ecn==i,]
+  #ninetyh<-subset(subbyh, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
+  #outtyh<- c(i,length(ninetyh$FIRE_SIZE_ha),mean(ninetyh$FIRE_SIZE_ha),sd(ninetyh$FIRE_SIZE_ha),median(ninetyh$FIRE_SIZE_ha),sum(ninetyh$FIRE_SIZE_ha))
+  #outputh<-rbind(outputh,outtyh)
+#}
 
-colnames(outputh) <- c("ecn", "hnobs", "hmean","hsd","hmedian","hsum")
-row.names(outputh)<-NULL
-head(outputh)
+#colnames(outputh) <- c("ecn", "hnobs", "hmean","hsd","hmedian","hsum")
+#row.names(outputh)<-NULL
+#head(outputh)
 
-summary(hmean)
+#summary(hmean)
 
 #lightning subset of large fires only
-outputl=NULL
+#outputl=NULL
 
-for (i in tt33) {
-  subl<-keep[keep$IGNITION=="Lightning",]
-  subbyl<-subl[subl$ecn==i,]
-  ninetyl<-subset(subbyl, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
-  outtyl<- c(i,length(ninetyl$FIRE_SIZE_ha),mean(ninetyl$FIRE_SIZE_ha),sd(ninetyl$FIRE_SIZE_ha),median(ninetyl$FIRE_SIZE_ha),sum(ninetyl$FIRE_SIZE_ha))
-  outputl<-rbind(outputl,outtyl)
-}
+#for (i in tt33) {
+  #subl<-keep[keep$IGNITION=="Lightning",]
+  #subbyl<-subl[subl$ecn==i,]
+  #ninetyl<-subset(subbyl, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
+  #outtyl<- c(i,length(ninetyl$FIRE_SIZE_ha),mean(ninetyl$FIRE_SIZE_ha),sd(ninetyl$FIRE_SIZE_ha),median(ninetyl$FIRE_SIZE_ha),sum(ninetyl$FIRE_SIZE_ha))
+  #outputl<-rbind(outputl,outtyl)
+#}
 
-colnames(outputl) <- c("ecn", "lnobs", "lmean","lsd","lmedian","lsum")
-row.names(outputl)<-NULL
-head(outputl)
+#colnames(outputl) <- c("ecn", "lnobs", "lmean","lsd","lmedian","lsum")
+#row.names(outputl)<-NULL
+#head(outputl)
 
 
 #merge two dataframes together
