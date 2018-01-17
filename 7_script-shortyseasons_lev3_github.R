@@ -250,33 +250,33 @@ write.table(r66, "results/non_light_season.csv", sep=",", row.names=FALSE, appen
 
 
 #########################################
-#stopped here Tues night
 #split into east and west US; Figure 3a; Figure 3b
 region<-as.data.frame(read.csv("data/bounds/ecoregion/east_west/arc_map_regions.csv"))
 
-outputrr<-left_join(outputy,region,by="NA_L3CODE")
+outputrr<-left_join(keep,region,by="NA_L3CODE")
 
-rr<-summaryBy(OBJECTID~ig+region, data=outputrr, FUN=nobs)
+rr<-summaryBy(clean_id~IGNITION+region, data=outputrr, FUN=length)
 rr
-#human east = 88114 or 92.08%
-#lightning east = 7574 or 7.92%
-#human west = 41854 or 64.47%
-#lightning west = 23066 or 35.53%
+#human east = 96837 or 92.23%
+#lightning east = 8157 or 7.77%
+#human west = 45439 or 64.70%
+#lightning west = 24789 or 35.30%
 
-#east total = 95688
-88114+7574
-(88114/95688)*100
+#east total = 104994
+96837+8157
 
-(7574/95688)*100
+(96837/104994)*100
 
-#west total = 64920
-41854+23066
+(8157/104994)*100
 
-(41854/64920)*100
+#west total = 70228
+45439+24789
 
-(23066/64920)*100
+(45439/70228)*100
 
-r5 <- summaryBy(OBJECTID~DISCOVERY1+ig+region, data=outputrr, FUN=nobs)
+(24789/70228)*100
+
+r5 <- summaryBy(clean_id~DISCOVERY_DOY+IGNITION+region, data=outputrr, FUN=length)
 r5
 #tt<-as.numeric(unique(r3$ecn))
 
@@ -290,7 +290,7 @@ r6west <- subset(r5, r5$region == "west")
 # fire season, large fires, all ecoregions, Figure 3a in manuscript
 r5east <- subset(r5east, select = -c(region) )
 
-wide5 <- reshape(r5east,v.names="OBJECTID.nobs", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
+wide5 <- reshape(r5east,v.names="clean_id.length", idvar="IGNITION", timevar="DISCOVERY_DOY", direction="wide") #change number here 
 wide5[is.na(wide5)] <- 0
 
 w5 <- wide5[,2:length(wide5)]
@@ -312,7 +312,7 @@ barplot(r5m, beside=T, horiz=F, legend=T, col=c("red", "blue"),
 #west
 r6west <- subset(r6west, select = -c(region) )
 
-wide6 <- reshape(r6west,v.names="OBJECTID.nobs", idvar="ig", timevar="DISCOVERY1", direction="wide") #change number here 
+wide6 <- reshape(r6west,v.names="clean_id.length", idvar="IGNITION", timevar="DISCOVERY_DOY", direction="wide") #change number here 
 wide6[is.na(wide6)] <- 0
 
 w6 <- wide6[,2:length(wide6)]
