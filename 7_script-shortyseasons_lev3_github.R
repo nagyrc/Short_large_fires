@@ -57,6 +57,7 @@ tt33<-unique(keep$ecn)
 head(keep)
 output=NULL
 
+#this is not correct; keep has already been subset to the top 10% fires
 for (i in tt33) {
   subby<-keep[keep$ecn==i,]
   ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
