@@ -1,6 +1,6 @@
 #unused code
 
-
+#######################################################
 #from script #7 (shortyseasons_lev3_github)
 ####################################
 #large fire data exploration
@@ -18,7 +18,6 @@ ggplot(data=keep, aes(keep$FIRE_SIZE_ha)) +
 
 #######################
 
-#######################################################
 #seasonal correlations of large fires with fires of all sizes for east and west (by region)
 #number of fires by Julian day of year
 #fires of all causes
@@ -349,4 +348,4 @@ r7<-r6wide[order(r6wide$perh),]
 write.table(r7, "/Users/rana7082/Dropbox/ecoregions/derived/perh_ecn_Short_update.csv", sep=",", row.names=FALSE)
 
 
-##############################################
+#######################################################
