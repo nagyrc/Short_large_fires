@@ -458,7 +458,7 @@ shrt_clim_veg <- left_join(shrt_clim_bio, shrt_bps3, by = "clean_id")
 #convert to dataframe
 #this should work after "GROUPVEG" has been selected
 #shrt_bps_df <-as.data.frame(shrt_bps) %>% 
-  #dplyr::select("clean_id", "us_130bps")
+#dplyr::select("clean_id", "us_130bps")
 
 #shrt_clim_veg <- left_join(shrt_clim_bio, shrt_bps_df, by = "clean_id")
 ###
@@ -514,7 +514,7 @@ writeSpatialShape(all_fires, "data/merged/all_fires.shp")
 #was this used to join ecoreg?
 #cl <- makeCluster(UseCores)
 #lrg_shrt_fire <- foreach(i = 1:NROW(shrt_clim_veg_eco)) %dopar% {
-  #st_intersection(shrt_clim_veg_eco[i], ecoreg)} das
+#st_intersection(shrt_clim_veg_eco[i], ecoreg)} das
 #stopCluster(cl)
 
 #make large fire subset
