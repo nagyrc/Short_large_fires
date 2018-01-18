@@ -305,7 +305,7 @@ r5m <- as.matrix(wide5[,2:length(wide5)])
 rownames(r5m) <- wide5[,1]
 colnames(r5m)<-c(1:366)
 
-
+#Figure 3a
 barplot(r5m, beside=T, horiz=F, legend=T, col=c("red", "blue"), 
         xlab = "Day of year in Julian Day", ylab = "Number of Fires", main= "East",
         border=c("red","blue"), cex.names=1.25, cex.axis=1.25, cex.lab=1.25,ylim=c(0,1200))
@@ -327,6 +327,7 @@ r6m <- as.matrix(wide6[,2:length(wide6)])
 rownames(r6m) <- wide6[,1]
 colnames(r6m)<-c(1:366)
 
+#Figure 3b
 barplot(r6m, beside=T, horiz=F, legend=T, col=c("red", "blue"), 
         xlab = "Day of year in Julian Day", ylab = "Number of Fires", main="West",
         border=c("red","blue"), cex.names=1.25, cex.axis=1.25, cex.lab=1.25,ylim=c(0,1200))
