@@ -11,6 +11,9 @@ lrg_fires<- read.csv("data/merged/lrg_fires.csv")
 keep<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR!="Missing/Undefined"),]
 head(keep)
 
+
+######################################################
+#biomass
 #summarize biomass by ecoregion
 biostats<-summaryBy(NBCD_countrywide_biomass_mosaic~NA_L3CODE,data=keep,FUN=c(mean),na.rm=TRUE)
 
@@ -128,3 +131,36 @@ summary(lmrege)
 lmregw<-lm(log(ha.mean)~log(bio.mean), data=westbio)
 summary(lmregw)
 #p=0.109
+
+
+
+######################################################
+#biophysical setting (bps)
+#summarize number of fires by bps
+
+#bring in all fires
+all_fires<- read.csv("data/merged/all_fires.csv")
+checkall<-summaryBy(clean_id~STAT_CAUSE_DESCR,data=all_fires,FUN=c(length))
+checkall
+
+keepall<-all_fires[which(all_fires$STAT_CAUSE_DESCR!="Missing/Undefined"),]
+checkall2<-summaryBy(clean_id~STAT_CAUSE_DESCR,data=keepall,FUN=c(length))
+checkall2
+
+#stats for all fires with Missing/Undefined removed
+bpsstats<-summaryBy(clean_id~GROUPVEG+IGNITION,data=keepall,FUN=c(length))
+head(bpsstats)
+
+wbpsall<-reshape(bpsstats,timevar="IGNITION",idvar="GROUPVEG",v.names="clean_id.length",direction="wide")
+head(wbpsall)
+colnames(wbpsall) <- c("GROUPVEG", "hnobsall", "lnobsall")
+wbpsall$ratio<-wbpsall$hnobsall/wbpsall$lnobsall
+write.table(wbpsall, "results/bps_stats_all.csv", sep=",", row.names=FALSE, append=FALSE)
+
+
+bpslrgstats<-summaryBy(clean_id~GROUPVEG+IGNITION,data=keep,FUN=c(length))
+wbpslrg<-reshape(bpslrgstats,timevar="IGNITION",idvar="GROUPVEG",v.names="clean_id.length",direction="wide")
+head(wbpslrg)
+colnames(wbpslrg) <- c("GROUPVEG", "hnobslrg", "lnobslrg")
+wbpslrg$ratio<-wbpslrg$hnobslrg/wbpslrg$lnobslrg
+write.table(wbpslrg, "results/bps_stats_lrg.csv", sep=",", row.names=FALSE, append=FALSE)
