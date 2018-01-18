@@ -1,5 +1,4 @@
 #this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
-#read Bethany's csv of Short data (large fires only) + average monthly fuel moisture from 1992-2013 by fire event
 
 library(sp)
 library(rgdal)
@@ -14,7 +13,7 @@ library(plotrix)
 #bring in Short data with fm and ws extracted
 #note, this has large fires only (top 10%)
 lrg_fires<- read.csv("data/merged/lrg_fires.csv")
-head(read)
+head(lrg_fires)
 
 #the format of NA_L3CODE is formatted incorrectly, so remove that field
 #read$NA_L3CODE<-NULL
