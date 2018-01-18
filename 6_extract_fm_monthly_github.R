@@ -249,7 +249,7 @@ write.table(sum11, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", ro
 sum2a<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(length))
 sum2a
 
-sum2b<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(mean))
+sum2b<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(mean),na.rm=TRUE)
 sum2b
 
 sum2c<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(median))
