@@ -232,7 +232,13 @@ ggplot(keep,aes(x=log(FIRE_SIZE_ha)+1)) +
 sum1<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3NAME, FUN=c(length,mean, sd, median,min, max))
 head(sum1)
 #for Table S1 in manuscript
-write.table(sum1, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
+
+#need level 1 code too
+key11<-unique(keep[c("NA_L3NAME","NA_L1NAME")])
+key11
+sum11<-left_join(sum1,key11,by=c('NA_L3NAME'))
+head(sum11)
+write.table(sum11, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #summary of mean fire size by ignition and ecoregion
 #sum2<-summaryBy(data=keep, FIRE_SIZE_ha~IGNITION+NA_L3NAME, FUN=c(mean))
