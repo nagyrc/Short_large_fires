@@ -151,13 +151,14 @@ checkall2
 bpsstats<-summaryBy(clean_id~GROUPVEG+IGNITION,data=keepall,FUN=c(length))
 head(bpsstats)
 
+#this is Table 2a
 wbpsall<-reshape(bpsstats,timevar="IGNITION",idvar="GROUPVEG",v.names="clean_id.length",direction="wide")
 head(wbpsall)
 colnames(wbpsall) <- c("GROUPVEG", "hnobsall", "lnobsall")
 wbpsall$ratio<-wbpsall$hnobsall/wbpsall$lnobsall
 write.table(wbpsall, "results/bps_stats_all.csv", sep=",", row.names=FALSE, append=FALSE)
 
-
+#this is Table 2b
 bpslrgstats<-summaryBy(clean_id~GROUPVEG+IGNITION,data=keep,FUN=c(length))
 wbpslrg<-reshape(bpslrgstats,timevar="IGNITION",idvar="GROUPVEG",v.names="clean_id.length",direction="wide")
 head(wbpslrg)
