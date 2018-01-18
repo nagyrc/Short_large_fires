@@ -431,7 +431,13 @@ wfm<-cast(r22, NA_L3CODE ~ IGNITION, value = 'fm.mean')
 head(wfm)
 wfm$diff_fm10<-wfm$Human-wfm$Lightning
 #note, where positive human > lightning
-write.table(wfm, "results/diff_fm_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+
+keyzzz<-unique(keep[c("NA_L3CODE","NA_L3NAME")])
+
+wfmzzz<-left_join(wfm,keyzzz,by=c('NA_L3CODE'))
+#head(joinz)
+
+write.table(wfmzzz, "results/diff_fm_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 #this data was added to shapefile in Arc
 
 
@@ -439,7 +445,11 @@ write.table(wfm, "results/diff_fm_NA_L3CODE_10_monthly.csv", sep=",", row.names=
 r44 <- summaryBy(Wind~IGNITION+NA_L3CODE, data=keep, FUN=mean, na.rm=TRUE)
 wws<-cast(r44, NA_L3CODE ~ IGNITION, value = 'Wind.mean')
 wws$diff_windspeed<-wws$Human-wws$Lightning
-write.table(wws, "results/diff_wind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+
+wwszzz<-left_join(wws,keyzzz,by=c('NA_L3CODE'))
+#head(joinz)
+
+write.table(wwszzz, "results/diff_wind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 #this data was added to shapefile in Arc
 
 
