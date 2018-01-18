@@ -55,7 +55,7 @@ lrg_fires_rr<-left_join(keep,region,by="NA_L3CODE")
 eastlrg<-lrg_fires_rr[which(lrg_fires_rr$region=="east"),]
 westlrg<-lrg_fires_rr[which(lrg_fires_rr$region=="west"),]
 
-#bring in fire size data by ecoregion (made in Script 7)
+#bring in fire size data by ecoregion (made below, line 236)
 fireha<-as.data.frame(read.csv("results/firehasum_ecn_top_ten_Short_update.csv"))
 #fireha$ecn<-as.numeric(gsub("[.]","",fireha$NA_L3CODE))
 head(fireha)
