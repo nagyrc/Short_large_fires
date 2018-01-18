@@ -45,7 +45,7 @@ p16 <- ggplot(data = dfbio1, aes(y = log(ha.mean), x = log(bio.mean),color=L1)) 
   theme_bw()+
   theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
   xlim(0,8)+
-  ylim(0,10)+
+  ylim(0,12)+
   #scale_colour_gradient(name="% human fires", low = "blue", high = "red", guide = "colourbar")+
   theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
   geom_smooth(method='lm', formula=y~x, se=FALSE)
