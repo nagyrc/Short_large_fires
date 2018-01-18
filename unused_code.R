@@ -348,4 +348,216 @@ r7<-r6wide[order(r6wide$perh),]
 write.table(r7, "/Users/rana7082/Dropbox/ecoregions/derived/perh_ecn_Short_update.csv", sep=",", row.names=FALSE)
 
 
+
+
+
+
+
+
+#######################################################
+#from script #6 (extract_fm_monthly_github)
+#plotting the data for visualization only
+#not presented in manuscript
+
+#plot the conditions where large human and large lightning fires exist
+#xy scatterplots of wind speed vs. fm for large fires
+#human only
+p16 <- ggplot() + 
+  geom_point(data = hub, color='red', aes(x = fm100_m, y = mnwind_m)) +
+  xlab('100 hr fuel moisture') +
+  ylab('wind speed')+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  xlim(0,30)+
+  ylim(0,9)+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))
+p16
+
+#lightning only
+p16 <- ggplot() + 
+  geom_point(data = lub, color='blue', aes(x = fm100_m, y = mnwind_m)) +
+  xlab('100 hr fuel moisture') +
+  ylab('wind speed')+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  xlim(0,30)+
+  ylim(0,9)+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))
+p16
+
+#combined human and lightning
+p16 <- ggplot() + 
+  geom_point(data = hub, alpha=0.5, color='red',aes(x = fm100_m, y = mnwind_m)) +
+  geom_point(data = lub, alpha=0.5, color='blue',aes(x = fm100_m, y = mnwind_m)) +
+  xlab('100 hr fuel moisture') +
+  ylab('wind speed')+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  xlim(0,30)+
+  ylim(0,9)+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))
+p16
+
+
+
+###
+#fuel moisture vs. standard deviation of wind speed, human fires
+p <- ggplot(hub, aes(fm100_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
+  geom_bin2d(bins = 20)+
+  scale_fill_manual("count", values = c("gray90","gray70", "gray50", "red","red2","red4"))+
+  xlim(0,30)+
+  ylim(0,5)+
+  xlab('100 hr fuel moisture (%)') +
+  ylab('std wind speed (m/s)')+
+  ggtitle("large human-caused fires")+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
+  theme(plot.title = element_text(size=20))
+p
+
+
+#fuel moisture vs. standard deviation of wind speed, lightning fires
+p <- ggplot(lub, aes(fm100_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
+  geom_bin2d(bins = 20)+
+  scale_fill_manual("count", values = c("gray90","gray70", "gray50", "dodgerblue","dodgerblue2","dodgerblue4"))+
+  xlim(0,30)+
+  ylim(0,5)+
+  xlab('100 hr fuel moisture (%)') +
+  ylab('std wind speed (m/s)')+
+  ggtitle("large lightning-caused fires")+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
+  theme(plot.title = element_text(size=20))
+p
+
+
+#wind speed vs. wind variability
+p <- ggplot(hub, aes(mnwind_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
+  geom_bin2d(bins = 20)+
+  scale_fill_manual("count", values = c("gray90","gray70", "gray50", "red","red2","red4"))+
+  xlim(0,9)+
+  ylim(0,5)+
+  xlab('mean wind speed ()') +
+  ylab('std wind speed ()')+
+  ggtitle("large human-caused fires")+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
+  theme(plot.title = element_text(size=20))
+p
+
+
+p <- ggplot(lub, aes(mnwind_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
+  geom_bin2d(bins = 20)+
+  scale_fill_manual("count", values = c("gray90","gray70", "gray50", "dodgerblue","dodgerblue2","dodgerblue4"))+
+  xlim(0,9)+
+  ylim(0,5)+
+  xlab('mean wind speed ()') +
+  ylab('std wind speed ()')+
+  ggtitle("large lightning-caused fires")+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
+  theme(plot.title = element_text(size=20))
+p
+
+
+###
+#regression of fire size vs. fuel moisture
+p16 <- ggplot(data = dft, aes(y = log(ha.mean), x = fm100_m.mean)) + 
+  geom_point() +
+  ylab('log (fire size (ha))') +
+  xlab('100-hr fuel moisture (%)')+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  xlim(0,20)+
+  ylim(0,10)+
+  #scale_colour_gradient(name="% human fires", low = "blue", high = "red", guide = "colourbar")+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
+  geom_smooth(method='lm', formula=y~x, se=FALSE)
+p16
+
+
+#regression of fire size vs. wind speed
+p16 <- ggplot(data = dft, aes(y = log(ha.mean), x = mnwind_m.mean)) + 
+  geom_point() +
+  ylab(' log(fire size (ha))') +
+  xlab('wind speed (m/s)')+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  xlim(0,6)+
+  ylim(0,10)+
+  #scale_colour_gradient(name="% human fires", low = "blue", high = "red", guide = "colourbar")+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
+  geom_smooth(method='lm', formula=y~x, se=FALSE)
+p16
+
+
+###
+#testy...I'm not sure that this works
+p16<-ggplot()+
+  geom_point(data=keep, aes(x=fm100_m,y=mnwind_m,color=ig),alpha=0.05)+
+  xlab('100 hr fuel moisture (%)') +
+  ylab('wind speed (m/s)')+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  xlim(0,30)+
+  ylim(0,9)+
+  #theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
+  ggtitle("ecoregion conditions of large fires")+
+  theme(plot.title = element_text(size=12))+
+  scale_color_manual(values=c("red","blue"))+
+  facet_wrap(~NA_L3CODE)+
+  theme(strip.background = element_blank())
+#theme(panel.spacing = unit(0, "lines"))
+p16
+
+
+####
+#histograms of fire size vs. ignition
+ggplot(keep,aes(log(x=ha)+1))+
+  geom_histogram()+
+  facet_grid(~ig)+
+  theme_bw()
+
+
+ggplot(aes(log(x=ha)+1))+
+  geom_histogram(data=hub)+
+  geom_histogram(data=lub)+
+  theme_bw()
+
+
+###
+#regression with ind. fires rather than ecoregion totals
+#fire size vs. fuel moisture
+p16 <- ggplot(data = dftt, aes(y = log(ha), x = fm100_m,color=region)) + 
+  geom_point() +
+  ylab('log (fire size (ha))') +
+  xlab('100-hr fuel moisture (%)')+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  xlim(0,40)+
+  ylim(0,20)+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
+  scale_color_manual(values=c("east"="black","west"="dark gray"))+
+  geom_smooth(method='lm', formula=y~x, se=FALSE)
+p16
+
+
+#fire size vs. wind speed
+p16 <- ggplot(data = dftt, aes(y = log(ha), x = mnwind_m,color=region)) + 
+  geom_point() +
+  ylab('log (fire size (ha))') +
+  xlab('wind speed (m/s)')+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
+  xlim(0,12)+
+  ylim(0,20)+
+  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
+  scale_color_manual(values=c("east"="black","west"="dark gray"))
+geom_smooth(method='lm', formula=y~x, se=FALSE)
+p16
+
 #######################################################

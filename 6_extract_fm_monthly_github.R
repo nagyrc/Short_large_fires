@@ -58,7 +58,7 @@ westlrg<-lrg_fires_rr[which(lrg_fires_rr$region=="west"),]
 #bring in fire size data by ecoregion (made in Script 7)
 fireha<-as.data.frame(read.csv("results/firehasum_ecn_top_ten_Short_update.csv"))
 #fireha$ecn<-as.numeric(gsub("[.]","",fireha$NA_L3CODE))
-
+head(fireha)
 ##########################################################
 #manuscript figures
 head(hub)
@@ -163,9 +163,9 @@ p
 ###
 #prep for Fig. 7
 #calculate mean fuel moisture vs. mean fire size by ecoregion
-tt11<-summaryBy(fm~NA_L3CODE,data=keep,FUN=c(mean))
-tt12<-summaryBy(Wind~NA_L3CODE,data=keep,FUN=c(mean))
-
+tt11<-summaryBy(fm~NA_L3CODE,data=keep,FUN=c(mean),na.rm=TRUE)
+tt12<-summaryBy(Wind~NA_L3CODE,data=keep,FUN=c(mean),na.rm=TRUE)
+head(tt11)
 #join summary tables
 dfa <- merge(tt11,tt12,by=c("NA_L3CODE"))
 head(dfa)
@@ -229,10 +229,9 @@ ggplot(keep,aes(x=log(FIRE_SIZE_ha)+1)) +
 ##########################################################
 #summary stats, regression, and t-tests
 
-#stopped here
 #summary statistics for large fires (mean, median, min, and max fire size) by ecoregion
 sum1<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3NAME, FUN=c(length,mean, sd, median,min, max))
-
+head(sum1)
 #for Table S1 in manuscript
 write.table(sum1, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
 
@@ -248,13 +247,19 @@ sum2a
 sum2b<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(mean))
 sum2b
 
+sum2c<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(median))
+sum2c
+
 wa<-reshape(sum2a,timevar="IGNITION",idvar="NA_L3CODE",v.names="FIRE_SIZE_ha.length",direction="wide")
 wb<-reshape(sum2b,timevar="IGNITION",idvar="NA_L3CODE",v.names="FIRE_SIZE_ha.mean",direction="wide")
+wc<-reshape(sum2c,timevar="IGNITION",idvar="NA_L3CODE",v.names="FIRE_SIZE_ha.median",direction="wide")
+
 
 output2<-merge(wa,wb,by="NA_L3CODE")
 output2
 
-colnames(output2) <- c("NA_L3CODE", "hnobs", "lnobs","hhamean","lhamean")
+output2<-merge(output2,wc,by="NA_L3CODE")
+colnames(output2) <- c("NA_L3CODE", "hnobs", "lnobs","hameanh","hameanl","hamedh","hamedl")
 #for figures in manuscript???
 
 output2$totfires<-output2$hnobs+output2$lnobs
@@ -266,12 +271,12 @@ write.table(zzz, "results/firestats_ecn_top_ten_Short_update_hl.csv", sep=",", r
 
 
 #t-test of mean size of large human fires vs. large lightning fires
-t.test(zzz$hhamean,zzz$lhamean,paired=TRUE)
+t.test(zzz$hameanh,zzz$hameanl,paired=TRUE)
 #p=0.0013; lightning fires are sig larger than human fires by ecoregion
 
-summary(zzz$hhamean)
+summary(zzz$hameanh)
 #mean=286.486 ha
-summary(zzz$lhamean)
+summary(zzz$hameanl)
 #mean=504.877 ha
 
 
@@ -286,36 +291,37 @@ write.table(w66, "results/burned_area_hl.csv", sep=",", row.names=FALSE, append=
 
 
 ###
+#there are some NAs in wind and fuel moisture, have to exclude those from calculations
 #stats for fuel moisture
 head(hub)
-mean(hub$fm)
-#14.56
-median(hub$fm)
-#15.21
-mean(lub$fm)
-#11.45
-median(lub$fm)
-#10.76
-std.error(hub$fm)
+mean(hub$fm, na.rm=TRUE)
+#14.541
+median(hub$fm, na.rm=TRUE)
+#15.249
+mean(lub$fm, na.rm=TRUE)
+#11.437
+median(lub$fm, na.rm=TRUE)
+#10.726
+std.error(hub$fm, na.rm=TRUE)
 #0.008
-std.error(lub$fm)
-#0.022
+std.error(lub$fm, na.rm=TRUE)
+#0.021
 
-#stopped here Wed afternoon...these means are not working.
 #stats for wind speed
-mean(hub$Wind)
-#3.96
-median(hub$Wind)
-#3.999
-mean(lub$Wind)
-#3.418
-median(lub$Wind)
-#3.306
+summary(hub$Wind)
+mean(hub$Wind, na.rm=TRUE)
+#4.003
+median(hub$Wind, na.rm=TRUE)
+#4.040
+mean(lub$Wind, na.rm=TRUE)
+#3.439
+median(lub$Wind, na.rm=TRUE)
+#3.323
 
-std.error(hub$Wind)
-#0.00198
-std.error(lub$Wind)
-#0.003566
+std.error(hub$Wind, na.rm=TRUE)
+#0.00192
+std.error(lub$Wind, na.rm=TRUE)
+#0.00343
 
 
 #stats for standard deviation of wind speed
@@ -336,337 +342,130 @@ std.error(lub$Wind)
 
 
 #t-test of mean fuel moisture data by ignition type
-t.test(keep$fm100_m~keep$ig,var.equal = TRUE)
+t.test(keep$fm~keep$IGNITION,var.equal = TRUE)
 #p=<2.2e-16
 
 #t-test of mean wind speed data by ignition type
-t.test(keep$mnwind_m~keep$ig,var.equal = TRUE)
+t.test(keep$Wind~keep$IGNITION,var.equal = TRUE)
 #p=<2.2e-16
 
 #t-test of mean wind speed standard deviation by ignition type
-t.test(keep$stdwind_m~keep$ig,var.equal = TRUE)
+#t.test(keep$stdwind_m~keep$ig,var.equal = TRUE)
 #p=<2.2e-16
 
 
 
 #summary data of fuel moisture by ignition type and ecoregion
-tti1<-summaryBy(data=keep, fm100_m~ig+NA_L3CODE)
+tti1<-summaryBy(data=keep, fm~IGNITION+NA_L3CODE)
 
 #make a dataframe of this
-df1<-as.data.frame(tti1)
+dfi1<-as.data.frame(tti1)
 
 #reshape dataframe
-w <- reshape(df1, timevar = "ig", idvar = "NA_L3CODE", v.names = "fm100_m.mean", direction = "wide")
-
+wi1 <- reshape(dfi1, timevar = "IGNITION", idvar = "NA_L3CODE", v.names = "fm.mean", direction = "wide")
+head(wi1)
 #calculate the difference in fuel moisture in human vs. lightning fires by ecoregion
-w$fmdiffmon<-w$fm100_m.mean.human-w$fm100_m.mean.lightning
+wi1$fmdiffmon<-wi1$fm.mean.Human-wi1$fm.mean.Lightning
 
 #order
-word<-w[with(w, order(-fmdiffmon)), ]
+word<-wi1[with(wi1, order(-fmdiffmon)), ]
 
 #t-test of the difference fuel moisture in human vs. lightning fires
-t.test(w$fm100_m.mean.human,w$fm100_m.mean.lightning,paired=TRUE)
-#p=7.039e-06
+t.test(wi1$fm.mean.Human,wi1$fm.mean.Lightning,paired=TRUE)
+#p=4.25e-07
 
 
 ###
 #regression
 
 #fire size vs. fuel moisture
-lm1<-lm(log(ha.mean)~fm100_m.mean, data=dft)
+lm1<-lm(log(ha.mean)~fm.mean, data=dft)
 summary(lm1)
-#p=3.22e-09
-#y=-0.355x+9.4499
+#p=3.28e-11
+#y=-0.47177x+12.8953
 #is significantly (-) related
 
 #fire size vs. wind speed
-lm1<-lm(log(ha.mean)~mnwind_m.mean, data=dft)
-summary(lm1)
-#p=9.99e-05
-#y=-1.465x+10.4702
+lm2<-lm(log(ha.mean)~Wind.mean, data=dft)
+summary(lm2)
+#p=3.73e-05
+#y=-1.8437x+14.0533
 #is significantly (-) related
 
 #fire size vs. fuel moisture; eastern ecoregions
-lm1<-lm(log(ha.mean)~fm100_m.mean, data=east)
-summary(lm1)
-#p=0.05; (+)
+lm3<-lm(log(ha.mean)~fm.mean, data=east)
+summary(lm3)
+#p=0.487; 
 
 #fire size vs. fuel moisture; western ecoregions
-lm2<-lm(log(ha.mean)~fm100_m.mean, data=west)
-summary(lm2)
-#p=0.0005; (-)
+lm4<-lm(log(ha.mean)~fm.mean, data=west)
+summary(lm4)
+#p=0.00546; (-)
 
 #fire size vs. wind speed; eastern ecoregions
-lm3<-lm(log(ha.mean)~mnwind_m.mean, data=east)
-summary(lm3)
-#p=0.17
+lm5<-lm(log(ha.mean)~Wind.mean, data=east)
+summary(lm5)
+#p=0.913
 
 #fire size vs. wind speed; western ecoregions
-lm4<-lm(log(ha.mean)~mnwind_m.mean, data=west)
-summary(lm4)
-#p=0.93
+lm6<-lm(log(ha.mean)~Wind.mean, data=west)
+summary(lm6)
+#p=0.6035
 
 
 ###
 #to calculate the difference in mean fuel moisture: human vs. lightning; used to make Figure 6a
-r2 <- summaryBy(fm100_m~ig+NA_L3CODE, data=keep, FUN=mean)
-wfm<-cast(r2, NA_L3CODE ~ ig, value = 'fm100_m.mean')
-wfm$diff_fm10<-w$human-w$lightning
+r22 <- summaryBy(fm~IGNITION+NA_L3CODE, data=keep, FUN=mean, na.rm=TRUE)
+wfm<-cast(r22, NA_L3CODE ~ IGNITION, value = 'fm.mean')
+head(wfm)
+wfm$diff_fm10<-wfm$Human-wfm$Lightning
 #note, where positive human > lightning
-write.table(wfm, "/Users/rana7082/Dropbox/ecoregions/derived/diff_fm_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+write.table(wfm, "results/diff_fm_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 #this data was added to shapefile in Arc
 
 
 #to calculate the difference in mean wind speed: human vs. lightning; used to make Figure 6b
-r3 <- summaryBy(mnwind_m~ig+NA_L3CODE, data=keep, FUN=mean)
-wws<-cast(r3, NA_L3CODE ~ ig, value = 'mnwind_m.mean')
-wws$diff_windspeed<-w$human-w$lightning
-write.table(wws, "/Users/rana7082/Dropbox/ecoregions/derived/diff_wind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+r44 <- summaryBy(Wind~IGNITION+NA_L3CODE, data=keep, FUN=mean, na.rm=TRUE)
+wws<-cast(r44, NA_L3CODE ~ IGNITION, value = 'Wind.mean')
+wws$diff_windspeed<-wws$Human-wws$Lightning
+write.table(wws, "results/diff_wind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 #this data was added to shapefile in Arc
 
 
 #to calculate the difference in the standard deviation of wind speed: human vs. lightning
 #standard deviation of wind speed; not reported in manuscript
-r4 <- summaryBy(stdwind_m~ig+NA_L3CODE, data=keep, FUN=mean)
-wwssd<-cast(r4, NA_L3CODE ~ ig, value = 'stdwind_m.mean')
-wwssd$diff_sdwindspeed<-w$human-w$lightning
-write.table(wwssd, "/Users/rana7082/Dropbox/ecoregions/derived/diff_sdwind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
+#r4 <- summaryBy(stdwind_m~ig+NA_L3CODE, data=keep, FUN=mean)
+#wwssd<-cast(r4, NA_L3CODE ~ ig, value = 'stdwind_m.mean')
+#wwssd$diff_sdwindspeed<-w$human-w$lightning
+#write.table(wwssd, "/Users/rana7082/Dropbox/ecoregions/derived/diff_sdwind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 ###
 #summary of fire size by ecoregion and ignition
-lll<-as.data.frame(summaryBy(ha~NA_L3CODE+ig,data=keep, FUN=mean))
-wid<-cast(lll, NA_L3CODE ~ ig, value = 'ha.mean')
-write.table(wid, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
+#sum66<-as.data.frame(summaryBy(FIRE_SIZE_ha~NA_L3CODE+IGNITION,data=keep, FUN=mean))
+#wid<-cast(sum66, NA_L3CODE ~ IGNITION, value = 'FIRE_SIZE_ha.mean')
+#write.table(wid, "results/fireha_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #summary of number fire events by ecoregion and ignition
-hhh<-as.data.frame(summaryBy(FOD_ID~NA_L3CODE+ig,data=keep,FUN=length))
-wider<-cast(hhh, NA_L3CODE ~ ig, value = 'FOD_ID.length')
-head(wider)
-write.table(wider, "/Users/rana7082/Dropbox/ecoregions/derived/nobs_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
+#sum77<-as.data.frame(summaryBy(clean_id~NA_L3CODE+IGNITION,data=keep,FUN=length))
+#wider<-cast(sum77, NA_L3CODE ~ IGNITION, value = 'clean_id.length')
+#head(wider)
+#write.table(wider, "results/nobs_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 #summary of fire size by ecoregion only
-uuu<-as.data.frame(summaryBy(ha~NA_L3CODE,data=keep, FUN=mean))
-write.table(uuu, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_10.csv", sep=",", row.names=FALSE, append=FALSE)
+#uuu<-as.data.frame(summaryBy(ha~NA_L3CODE,data=keep, FUN=mean))
+#write.table(uuu, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_10.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 ###
 #stats with median
-tti2<-summaryBy(data=keep, ha~ig+NA_L3CODE, FUN=median)
-df2<-as.data.frame(tti2)
-w2 <- reshape(df2, timevar = "ig", idvar = "NA_L3CODE", v.names = "ha.median", direction = "wide")
-write.table(w2, "C:/Users/rnagy/Dropbox/ecoregions/derived/firehamed_10hl.csv", sep=",", row.names=FALSE, append=FALSE)
+#tti2<-summaryBy(data=keep, ha~ig+NA_L3CODE, FUN=median)
+#df2<-as.data.frame(tti2)
+#w2 <- reshape(df2, timevar = "ig", idvar = "NA_L3CODE", v.names = "ha.median", direction = "wide")
+#write.table(w2, "C:/Users/rnagy/Dropbox/ecoregions/derived/firehamed_10hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 
 
-
-
-
-
-##########################################################
-#plotting the data for visualization only
-#not presented in manuscript
-
-#plot the conditions where large human and large lightning fires exist
-#xy scatterplots of wind speed vs. fm for large fires
-#human only
-p16 <- ggplot() + 
-  geom_point(data = hub, color='red', aes(x = fm100_m, y = mnwind_m)) +
-  xlab('100 hr fuel moisture') +
-  ylab('wind speed')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,30)+
-  ylim(0,9)+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))
-p16
-
-#lightning only
-p16 <- ggplot() + 
-  geom_point(data = lub, color='blue', aes(x = fm100_m, y = mnwind_m)) +
-  xlab('100 hr fuel moisture') +
-  ylab('wind speed')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,30)+
-  ylim(0,9)+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))
-p16
-
-#combined human and lightning
-p16 <- ggplot() + 
-  geom_point(data = hub, alpha=0.5, color='red',aes(x = fm100_m, y = mnwind_m)) +
-  geom_point(data = lub, alpha=0.5, color='blue',aes(x = fm100_m, y = mnwind_m)) +
-  xlab('100 hr fuel moisture') +
-  ylab('wind speed')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,30)+
-  ylim(0,9)+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))
-p16
-
-
-
-###
-#fuel moisture vs. standard deviation of wind speed, human fires
-p <- ggplot(hub, aes(fm100_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
-  geom_bin2d(bins = 20)+
-  scale_fill_manual("count", values = c("gray90","gray70", "gray50", "red","red2","red4"))+
-  xlim(0,30)+
-  ylim(0,5)+
-  xlab('100 hr fuel moisture (%)') +
-  ylab('std wind speed (m/s)')+
-  ggtitle("large human-caused fires")+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
-  theme(plot.title = element_text(size=20))
-p
-
-
-#fuel moisture vs. standard deviation of wind speed, lightning fires
-p <- ggplot(lub, aes(fm100_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
-  geom_bin2d(bins = 20)+
-  scale_fill_manual("count", values = c("gray90","gray70", "gray50", "dodgerblue","dodgerblue2","dodgerblue4"))+
-  xlim(0,30)+
-  ylim(0,5)+
-  xlab('100 hr fuel moisture (%)') +
-  ylab('std wind speed (m/s)')+
-  ggtitle("large lightning-caused fires")+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
-  theme(plot.title = element_text(size=20))
-p
-
-
-#wind speed vs. wind variability
-p <- ggplot(hub, aes(mnwind_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
-  geom_bin2d(bins = 20)+
-  scale_fill_manual("count", values = c("gray90","gray70", "gray50", "red","red2","red4"))+
-  xlim(0,9)+
-  ylim(0,5)+
-  xlab('mean wind speed ()') +
-  ylab('std wind speed ()')+
-  ggtitle("large human-caused fires")+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
-  theme(plot.title = element_text(size=20))
-p
-
-
-p <- ggplot(lub, aes(mnwind_m, stdwind_m, fill=cut(..count.., c(0,2,5,50,500,5000,20000))))+
-  geom_bin2d(bins = 20)+
-  scale_fill_manual("count", values = c("gray90","gray70", "gray50", "dodgerblue","dodgerblue2","dodgerblue4"))+
-  xlim(0,9)+
-  ylim(0,5)+
-  xlab('mean wind speed ()') +
-  ylab('std wind speed ()')+
-  ggtitle("large lightning-caused fires")+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
-  theme(plot.title = element_text(size=20))
-p
-
-
-###
-#regression of fire size vs. fuel moisture
-p16 <- ggplot(data = dft, aes(y = log(ha.mean), x = fm100_m.mean)) + 
-  geom_point() +
-  ylab('log (fire size (ha))') +
-  xlab('100-hr fuel moisture (%)')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,20)+
-  ylim(0,10)+
-  #scale_colour_gradient(name="% human fires", low = "blue", high = "red", guide = "colourbar")+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
-  geom_smooth(method='lm', formula=y~x, se=FALSE)
-p16
-
-
-#regression of fire size vs. wind speed
-p16 <- ggplot(data = dft, aes(y = log(ha.mean), x = mnwind_m.mean)) + 
-  geom_point() +
-  ylab(' log(fire size (ha))') +
-  xlab('wind speed (m/s)')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,6)+
-  ylim(0,10)+
-  #scale_colour_gradient(name="% human fires", low = "blue", high = "red", guide = "colourbar")+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
-  geom_smooth(method='lm', formula=y~x, se=FALSE)
-p16
-
-
-###
-#testy...I'm not sure that this works
-p16<-ggplot()+
-  geom_point(data=keep, aes(x=fm100_m,y=mnwind_m,color=ig),alpha=0.05)+
-  xlab('100 hr fuel moisture (%)') +
-  ylab('wind speed (m/s)')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,30)+
-  ylim(0,9)+
-  #theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
-  ggtitle("ecoregion conditions of large fires")+
-  theme(plot.title = element_text(size=12))+
-  scale_color_manual(values=c("red","blue"))+
-  facet_wrap(~NA_L3CODE)+
-  theme(strip.background = element_blank())
-  #theme(panel.spacing = unit(0, "lines"))
-p16
-
-
-####
-#histograms of fire size vs. ignition
-ggplot(keep,aes(log(x=ha)+1))+
-  geom_histogram()+
-  facet_grid(~ig)+
-  theme_bw()
-
-
-ggplot(aes(log(x=ha)+1))+
-  geom_histogram(data=hub)+
-  geom_histogram(data=lub)+
-  theme_bw()
-
-
-###
-#regression with ind. fires rather than ecoregion totals
-#fire size vs. fuel moisture
-p16 <- ggplot(data = dftt, aes(y = log(ha), x = fm100_m,color=region)) + 
-  geom_point() +
-  ylab('log (fire size (ha))') +
-  xlab('100-hr fuel moisture (%)')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,40)+
-  ylim(0,20)+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
-  scale_color_manual(values=c("east"="black","west"="dark gray"))+
-  geom_smooth(method='lm', formula=y~x, se=FALSE)
-p16
-
-
-#fire size vs. wind speed
-p16 <- ggplot(data = dftt, aes(y = log(ha), x = mnwind_m,color=region)) + 
-  geom_point() +
-  ylab('log (fire size (ha))') +
-  xlab('wind speed (m/s)')+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
-  xlim(0,12)+
-  ylim(0,20)+
-  theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=18),legend.title=element_text(size=18))+
-  scale_color_manual(values=c("east"="black","west"="dark gray"))
-geom_smooth(method='lm', formula=y~x, se=FALSE)
-p16
 
 
