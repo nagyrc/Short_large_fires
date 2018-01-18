@@ -204,10 +204,13 @@ r4
 
 r4.1<-summaryBy(DISCOVERY_DOY~IGNITION+NA_L3CODE, data=keep, FUN=median)
 r4.1
-#this gives the median day of year for human and lightning by ecoregion
+wdoy<-reshape(r4.1,timevar="IGNITION",idvar="NA_L3CODE",v.names="DISCOVERY_DOY.median",direction="wide")
+head(wdoy)
+wdoy$diff<-wdoy$DISCOVERY_DOY.median.Human-wdoy$DISCOVERY_DOY.median.Lightning
+#this gives the difference in the median day of year for human and lightning by ecoregion
 
-#output table
-write.table(r4.1, "results/meddoyhl.csv", sep=",", row.names=FALSE, append=FALSE)
+#output table; this is Figure S5
+write.table(wdoy, "results/meddoyhl.csv", sep=",", row.names=FALSE, append=FALSE)
 ################################################
 
 
@@ -248,7 +251,7 @@ out
 r66 <- summaryBy(clean_id~NA_L3CODE, data=out, FUN=length)
 r66
 
-#output table
+#output table. This is Figure S6
 write.table(r66, "results/non_light_season.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
