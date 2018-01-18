@@ -67,6 +67,9 @@ l12<-dfbio1[which(dfbio1$L1=="12"),]
 l13<-dfbio1[which(dfbio1$L1=="13"),]
 l15<-dfbio1[which(dfbio1$L1=="15"),]
 
+keyzzz1<-unique(keep[c("NA_L1CODE","NA_L1NAME")])
+keyzzz1
+
 lm5<-lm(log(ha.mean)~log(bio.mean), data=l5)
 summary(lm5)
 #p=0.15

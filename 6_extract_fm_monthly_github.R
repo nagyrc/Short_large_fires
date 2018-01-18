@@ -433,7 +433,7 @@ wfm$diff_fm10<-wfm$Human-wfm$Lightning
 #note, where positive human > lightning
 
 keyzzz<-unique(keep[c("NA_L3CODE","NA_L3NAME")])
-
+keyzzz
 wfmzzz<-left_join(wfm,keyzzz,by=c('NA_L3CODE'))
 #head(joinz)
 
