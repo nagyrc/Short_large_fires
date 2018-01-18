@@ -542,23 +542,7 @@ lrg_firesng$FIRE_SIZE_ha <-lrg_firesng$FIRE_SIZE_m2*0.0001
 write.table(lrg_firesng, "data/merged/lrg_fires.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
-######################
-#for sensitivity analysis; try also 95% and 80%
-lrg_fires95=NULL
-for (i in tt3) {
-  subby<-all_fires[all_fires$NA_L3CODE==i,]
-  ninetyfive<-subset(subby, FIRE_SIZE >= quantile(FIRE_SIZE, 0.95))
-  lrg_fires95<-rbind(lrg_fires95,data.frame(ninetyfive[,]))
-}
-#nobs=96739
 
-lrg_fires80=NULL
-for (i in tt3) {
-  subby<-all_fires[all_fires$NA_L3CODE==i,]
-  eighty<-subset(subby, FIRE_SIZE >= quantile(FIRE_SIZE, 0.80))
-  lrg_fires80<-rbind(lrg_fires80,data.frame(eighty[,]))
-}
-#nobs=392937
 
 
 
