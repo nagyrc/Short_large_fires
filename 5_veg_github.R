@@ -37,8 +37,8 @@ dfbio1$L1<-as.character(dfbio1$NA_L1CODE)
 #code to make Fig 7c
 p16 <- ggplot(data = dfbio1, aes(y = log(ha.mean), x = log(bio.mean),color=L1)) + 
   geom_point() +
-  ylab('log fire size (ha)') +
-  xlab('log biomass')+
+  ylab('log (fire size (ha))') +
+  xlab('log (biomass (g/m2))')+
   theme_bw()+
   theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
   xlim(0,8)+
@@ -66,31 +66,32 @@ l15<-dfbio1[which(dfbio1$L1=="15"),]
 
 lm5<-lm(log(ha.mean)~log(bio.mean), data=l5)
 summary(lm5)
-#p=0.14
+#p=0.15
 
 lm6<-lm(log(ha.mean)~log(bio.mean), data=l6)
 summary(lm6)
-#p=0.52
+#p=0.94
 
 lm7<-lm(log(ha.mean)~log(bio.mean), data=l7)
 summary(lm7)
-#p=0.64
+#p=0.82
 
 lm8<-lm(log(ha.mean)~log(bio.mean), data=l8)
 summary(lm8)
-#p=0.297
+#p=0.82
 
 lm9<-lm(log(ha.mean)~log(bio.mean), data=l9)
 summary(lm9)
-#p=0.463
+#p=0.02
+#this is sig related (-)
 
 lm10<-lm(log(ha.mean)~log(bio.mean), data=l10)
 summary(lm10)
-#p=0.99
+#p=0.306
 
 lm11<-lm(log(ha.mean)~log(bio.mean), data=l11)
 summary(lm11)
-#p=0.328
+#p=0.1751
 
 lm12<-lm(log(ha.mean)~log(bio.mean), data=l12)
 summary(lm12)
@@ -105,10 +106,10 @@ summary(lm15)
 #p=NA
 
 
-lm1<-lm(log(ha.mean)~log(bio.mean), data=dftb)
-summary(lm1)
-#p=5.09e-06
-#y=-0.57x+7.38
+lmall<-lm(log(ha.mean)~log(bio.mean), data=dfbio1)
+summary(lmall)
+#p=1.08e-06
+#y=-0.57x+9.1689
 
 
 #split ecoregions into east and west US
@@ -121,9 +122,9 @@ dfbio1r<-left_join(dfbio1,region,by=c('NA_L3CODE'))
 eastbio<-dfbio1r[which(dfbio1r$region=="east"),]
 westbio<-dfbio1r[which(dfbio1r$region=="west"),]
 
-lm1<-lm(log(ha.mean)~log(bio.mean), data=eastbio)
-summary(lm1)
-#p=0.00124; (-)
-lm2<-lm(log(ha.mean)~log(bio.mean), data=westbio)
-summary(lm2)
-#p=0.11
+lmrege<-lm(log(ha.mean)~log(bio.mean), data=eastbio)
+summary(lmrege)
+#p=0.00425; (-)
+lmregw<-lm(log(ha.mean)~log(bio.mean), data=westbio)
+summary(lmregw)
+#p=0.109
