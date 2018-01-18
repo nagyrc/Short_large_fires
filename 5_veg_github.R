@@ -147,6 +147,11 @@ keepall<-all_fires[which(all_fires$STAT_CAUSE_DESCR!="Missing/Undefined"),]
 checkall2<-summaryBy(clean_id~STAT_CAUSE_DESCR,data=keepall,FUN=c(length))
 checkall2
 
+checkall2b<-summaryBy(clean_id~IGNITION,data=keepall,FUN=c(length))
+checkall2b
+#1,424,630 human
+#274,205 lightning
+
 #stats for all fires with Missing/Undefined removed
 bpsstats<-summaryBy(clean_id~GROUPVEG+IGNITION,data=keepall,FUN=c(length))
 head(bpsstats)
@@ -165,3 +170,12 @@ head(wbpslrg)
 colnames(wbpslrg) <- c("GROUPVEG", "hnobslrg", "lnobslrg")
 wbpslrg$ratio<-wbpslrg$hnobslrg/wbpslrg$lnobslrg
 write.table(wbpslrg, "results/bps_stats_lrg.csv", sep=",", row.names=FALSE, append=FALSE)
+
+
+checkall2c<-summaryBy(clean_id~IGNITION,data=keep,FUN=c(length))
+checkall2c
+#142,276 human
+#32,946 lightning
+
+142276/32946
+#4.318
