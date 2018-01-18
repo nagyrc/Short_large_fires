@@ -233,7 +233,7 @@ sum1<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3NAME, FUN=c(length,mean, sd, median
 head(sum1)
 #for Table S1 in manuscript
 
-#need level 1 code too
+#need level 1 name too
 key11<-unique(keep[c("NA_L3NAME","NA_L1NAME")])
 key11
 sum11<-left_join(sum1,key11,by=c('NA_L3NAME'))
