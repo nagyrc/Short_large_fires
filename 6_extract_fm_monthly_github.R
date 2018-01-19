@@ -239,8 +239,8 @@ ggplot(keep,aes(x=log(FIRE_SIZE_ha)+1)) +
   theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
   theme(axis.text=element_text(size=20),axis.title=element_text(size=22),legend.text=element_text(size=12),legend.title=element_text(size=12))+
   theme(plot.title = element_text(size=20))+
-  xlab('log (Fire Size (ha))+1') +
-  ylab('Number of Large Fires')
+  xlab('Log (fire size (ha))+1') +
+  ylab('Number of large fires')
 
 
 
