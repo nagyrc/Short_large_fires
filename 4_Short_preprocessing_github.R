@@ -58,6 +58,11 @@ ecoreg <- st_read(dsn = eco, layer = "us_eco_l3", quiet= TRUE) %>%
          EcoArea_km2 = area_m2/1000000)
 plot(ecoreg[2])
 
+head(ecoreg)
+#not sure if this will work...if yes, join it to w66 in script 6
+areakey<-unique(ecoreg[c("NA_L3CODE","EcoArea_km2")])
+areakey
+
 # Intersects states with ecoregions
 #state_eco <- st_intersection(usa_shp, ecoreg) %>%
 #dplyr::select(STUSPS, NAME, StArea_km2, US_L3CODE, US_L3NAME, EcoArea_km2, NA_L2NAME, NA_L1CODE, NA_L1NAME, geometry)
