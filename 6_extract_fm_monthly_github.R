@@ -194,7 +194,7 @@ write.table(dfa, "results/fm_ws_monthly_ecn.csv", sep=",", row.names=FALSE, appe
 dft<-left_join(dfa,fireha,by="NA_L3CODE")
 
 head(dft)
-colnames(dft) <- c("NA_L3CODE", "fm.mean","Wind.mean","ecn","nobs", "ha.mean","ha.sd","ha.median","ha.sum")
+colnames(dft) <- c("NA_L3CODE", "fm.mean","Wind.mean","NA_L3NAME","nobs", "ha.mean","ha.sd","ha.median","ha.sum","ha.max","NA_L1NAME")
 
 #join tables and subset
 dftt<-left_join(dft,region,by="NA_L3CODE")
@@ -204,8 +204,8 @@ west<-dftt[which(dftt$region=="west"),]
 #fuel moisture vs. fire size for east and west; Fig. 7a
 p16 <- ggplot(data = dftt, aes(y = log(ha.mean), x = fm.mean,color=region)) + 
   geom_point() +
-  ylab('log (Fire Size (ha))') +
-  xlab('100-hr Fuel Moisture (%)')+
+  ylab('Log (fire size (ha))') +
+  xlab('100-hr fuel moisture (%)')+
   theme_bw()+
   theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
   xlim(0,20)+
@@ -219,8 +219,8 @@ p16
 #wind speed vs. fire size for east and west; Fig. 7b
 p16 <- ggplot(data = dftt, aes(y = log(ha.mean), x = Wind.mean,color=region)) + 
   geom_point() +
-  ylab('log (Fire Size (ha))') +
-  xlab('Wind Speed (m/s)')+
+  ylab('Log (fire size (ha))') +
+  xlab('wind speed (m/s)')+
   theme_bw()+
   theme(panel.grid.minor = element_blank(),panel.grid.major = element_blank())+
   xlim(0,6)+
