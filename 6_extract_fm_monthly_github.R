@@ -9,6 +9,7 @@ library(ggplot2)
 library(foreign)
 library(stats)
 library(plotrix)
+library(stringr)
 
 #bring in Short data with fm and ws extracted
 #note, this has large fires only (top 10%)
@@ -40,6 +41,24 @@ summary(lrg_fires$STAT_CAUSE_DESCR)
 keep<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR!="Missing/Undefined"),]
 190636-15414
 #175222
+
+#correct ha
+keep$FIRE_SIZE_ha<-keep$FIRE_SIZE_m2*0.0001
+namescheck<-unique(keep$NA_L3NAME)
+namescheck
+
+keep$NA_L3NAME <- as.character(keep$NA_L3NAME)
+str(keep)
+keep$NA_L3NAME <- mapply(gsub, pattern = "Chihuahuan Deserts",
+                        replacement = "Chihuahuan Desert", keep$NA_L3NAME)
+sum(keep$NA_L3NAME == "Chihuahuan Deserts")
+#0
+sum(keep$NA_L3NAME == "Chihuahuan Desert")
+#529
+
+sum(keep$NA_L3CODE == "10.2.4")
+#529
+
 hub<-keep[which(keep$STAT_CAUSE_DESCR!="Lightning"),]
 #142276
 lub<-keep[which(keep$STAT_CAUSE_DESCR=="Lightning"),]
@@ -234,7 +253,7 @@ head(sum1)
 #for Table S1 in manuscript
 
 #need level 1 name too
-key11<-unique(keep[c("NA_L3NAME","NA_L1NAME")])
+key11<-unique(keep[c("NA_L3NAME","NA_L1NAME","NA_L3CODE")])
 key11
 sum11<-left_join(sum1,key11,by=c('NA_L3NAME'))
 head(sum11)
