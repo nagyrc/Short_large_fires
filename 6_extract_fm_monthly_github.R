@@ -311,13 +311,14 @@ summary(zzz$hameanl)
 sum66<-summaryBy(data=keep, FIRE_SIZE_ha~IGNITION+NA_L3CODE, FUN=c(sum))
 w66<-reshape(sum66,timevar="IGNITION",idvar="NA_L3CODE",v.names="FIRE_SIZE_ha.sum",direction="wide")
 
-keyea<-unique(keep[c("NA_L3CODE","EcoArea_km2")])
+#don't use the EcoArea_km2 field
+#keyea<-unique(keep[c("NA_L3CODE","EcoArea_km2")])
 
-w66ea<-left_join(w66,keyea,by="NA_L3CODE")
-head(w66ea)
+#w66ea<-left_join(w66,keyea,by="NA_L3CODE")
+#head(w66ea)
 
-w66ea$barat<-w66ea$FIRE_SIZE_ha.sum.Human/w66ea$EcoArea_km2
-write.table(w66ea, "results/burned_area_hl.csv", sep=",", row.names=FALSE, append=FALSE)
+#w66ea$barat<-w66ea$FIRE_SIZE_ha.sum.Human/w66ea$EcoArea_km2
+write.table(w66, "results/burned_area_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 ###
