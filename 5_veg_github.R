@@ -23,10 +23,10 @@ fireha<-as.data.frame(read.csv("results/firehasum_ecn_top_ten_Short_update.csv")
 dfbio<-left_join(biostats,fireha,by="NA_L3CODE")
 
 head(dfbio)
-colnames(dfbio) <- c("NA_L3CODE", "bio.mean","ecn","nobs", "ha.mean","ha.sd","ha.median","ha.sum")
+colnames(dfbio) <- c("NA_L3CODE", "bio.mean","NA_L3NAME","nobs", "ha.mean","ha.sd","ha.median","ha.min", "ha.max", "NA_L1NAME")
 
 #remove unused columns
-dfbio<- subset(dfbio, select=-c(nobs,ha.sd,ha.median,ha.sum))
+dfbio<- subset(dfbio, select=-c(nobs,ha.sd,ha.median,ha.min,ha.max))
 
 #bring in Level I info
 #levels <- read.csv("C:/Users/rnagy/Dropbox/ecoregions/data/NA_CEC_Eco_Level3/NA_CEC_Eco_Level3.csv")
