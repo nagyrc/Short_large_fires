@@ -16,6 +16,8 @@ library(stringr)
 lrg_fires<- read.csv("data/merged/lrg_fires.csv")
 head(lrg_fires)
 
+lrgbyyear<-summaryBy(clean_id~DISCOVERY_YEAR,data=lrg_fires,FUN=c(length))
+
 #the format of NA_L3CODE is formatted incorrectly, so remove that field
 #read$NA_L3CODE<-NULL
 
@@ -37,6 +39,20 @@ summary(lrg_fires$STAT_CAUSE_DESCR)
 15414/190636*100
 #8.08%
 #report this in manuscript
+
+missing<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR=="Missing/Undefined"),]
+#15,414
+head(missing)
+miss<-summaryBy(clean_id~DISCOVERY_YEAR,data=missing,FUN=c(length))
+miss
+
+
+lrgmissbyyear<-left_join(lrgbyyear,miss,by="DISCOVERY_YEAR")
+head(lrgmissbyyear)
+colnames(lrgmissbyyear) <- c("year","large fires","missing cause")
+lrgmissbyyear$perc<-round(lrgmissbyyear$`missing cause`/lrgmissbyyear$`large fires`*100,digits=1)
+lrgmissbyyear
+
 
 keep<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR!="Missing/Undefined"),]
 190636-15414
