@@ -8,6 +8,7 @@ library(dplyr)
 #note, this has large fires only (top 10%)
 lrg_fires<- read.csv("data/merged/lrg_fires.csv")
 
+#remove the fires with undefined/missing cause
 keep<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR!="Missing/Undefined"),]
 head(keep)
 
