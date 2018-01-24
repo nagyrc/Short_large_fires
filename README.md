@@ -15,5 +15,5 @@ Contact info for Dr. Nagy:
 nagyrc@gmail.com; chelsea.nagy@colorado.edu
 Earth Lab, University of Colorado, Boulder
 
-
+The data can be downloaded here: https://zenodo.org/record/_____ . All of the code can be found at https://github.com/nagyrc/Short_large_fires . 
 
