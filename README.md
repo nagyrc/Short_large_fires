@@ -17,3 +17,32 @@ Earth Lab, University of Colorado, Boulder
 
 The data can be downloaded here: https://zenodo.org/record/_____ . All of the code can be found at https://github.com/nagyrc/Short_large_fires . 
 
+
+
+The following files were created in these 8 scripts above:
+
+bps_stats_all.csv: this is the results of fires of all sizes by biophysical setting or vegetation class; fields in this dataset include: GROUPVEG= biophycial setting or vegetation class; hnobsall= number of human fires of all sizes; lnobsall= number of lightning fires of all sizes; ratio= the ratio of human:lightning fires of all sizes by vegetation class
+
+bps_stats_lrg.csv: this is the results of large fires by biophysical setting or vegetation class; fields in this dataset include: GROUPVEG= biophycial setting or vegetation class; hnobslrg= number of large human fires; lnobslrg= number of large lightning fires; ratio= the ratio of large human:lightning fires by vegetation class
+
+fm_ws_monthly_ecn.csv: this is the mean monthly wind speed and fuel moisture by ecoregion; fields in this dataset include: NA_L3CODE= the level 3 ecoregion code from the CEC; fm.mean= mean monthly 100-h dead fuel moisture (%); Wind.mean= mean monthly wind speed (m/s)
+
+diff_fm_NA_L3CODE_10_monthly.csv: this is calculating the difference in mean monthly fuel moisture between large human and lightning-caused fires within an ecoregion; fields in this dataset include: NA_L3CODE= the level 3 ecoregion code from the CEC; Human= mean monthly 100-h dead fuel moisture (%) for large human-caused fires; Lightning= mean monthly 100-h dead fuel moisture (%) for large lightning-caused fires; diff_fm10= the difference in fuel moisture between large human minus large lightning-caused fires within an ecoregion; NA_L3NAME= the level 3 ecoregion name from CEC
+
+diff_wind_NA_L3CODE_10_monthly.csv: this is calculating the difference in mean monthly wind speed between large human and lightning-caused fires within an ecoregion; fields in this dataset include: NA_L3CODE= the level 3 ecoregion code from the CEC; Human= mean monthly wind speed (m/s) for large human-caused fires; Lightning= mean monthly wind speed (m/s) for large lightning-caused fires; diff_windspeed= the difference in wind speed between large human minus large lightning-caused fires within an ecoregion; NA_L3NAME= the level 3 ecoregion name from CEC
+
+firehasum_ecn_top_ten_Short_update.csv
+
+firestats_ecn_top_ten_Short_update_hl.csv
+
+burned_area_hl.csv
+
+meddoyhl.csv
+
+non_light_season.csv
+
+seasonal_corr_human_only.csv
+
+perh_large20.csv
+
+perh_large5.csv
