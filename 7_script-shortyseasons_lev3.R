@@ -1,6 +1,5 @@
 #this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
-#FIRE SEASONALITY with Level 3 ecoregions...Level 1 ecoregions in separate R script (script-shortyseasons061516.R)
-#use updated Short data from preprocessing
+#FIRE SEASONALITY with Level 3 ecoregions
 
 library(doBy)
 library(gdata)
@@ -10,7 +9,6 @@ library(dplyr)
 library(tibble)
 
 #updated Short data and joined with ecoregion data
-#slim<-as.data.frame(read.csv("data/merged/updatedShort_w_eco_slim3.csv"))
 
 #this has the geometry field removed
 lrg_fires<- read.csv("data/merged/lrg_fires.csv")
@@ -26,151 +24,8 @@ keep$FIRE_SIZE_ha<-keep$FIRE_SIZE_m2*0.0001
 summary(keep$FIRE_SIZE_ha)
 
 
-#check to make sure no water ecoregions
-#subz <- subset(keep, keep$ecn != 000)
-#subz <- subset(keep, keep$ecn != 0)
-#subz <- subset(keep, is.na(keep$ecn) == FALSE)
-#no water, undefined, keep using keep
-#can remove this
-
 tt33<-unique(keep$ecn)
 
-#top 10% largest fires only
-#################################
-#to understand what a large fire is in each ecoregion
-#extract top 10% of largest fires from each ecoregion
-#then put back into a dataframe that has all columns
-#outputy=NULL
-#for (i in tt3) {
-  #subby<-subz[subz$ecn==i,]
-  #ninety<-subset(subby, ha >= quantile(ha, 0.90))
-  #outputy<-rbind(outputy,data.frame(ninety[,]))
-#}
-
-#output table of large fires
-#write.table(outputy, "/Users/rana7082/Dropbox/ecoregions/derived/Short_large10.csv", sep=",", row.names=FALSE)
-
-
-################################
-#top 10% largest fires; summary statistics; reported in Table S1 in manuscript
-#create dataframe of number of fires, mean, sd of fire size by ecoregion (summary columns of the 10% largest fires)
-#head(keep)
-#output=NULL
-
-#this is not correct; keep has already been subset to the top 10% fires
-#for (i in tt33) {
-  #subby<-keep[keep$ecn==i,]
-  #ninety<-subset(subby, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
-  #outty<- c(i,length(ninety$FIRE_SIZE_ha),mean(ninety$FIRE_SIZE_ha),sd(ninety$FIRE_SIZE_ha),median(ninety$FIRE_SIZE_ha),sum(ninety$FIRE_SIZE_ha))
-  #output<-rbind(output,outty)
-#}
-#head(output)
-###
-
-#colnames(output) <- c("ecn", "nobs", "mean","sd","median","sum")
-#row.names(output)<-NULL
-
-#add key to this dataframe
-#tt19<-unique(keep[c("ecn", "NA_L3CODE")])
-#sum1<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3NAME, FUN=c(length,mean, sd, median,min, max))
-#sum1
-#fff<-merge(tt20,tt19,by="ecn")
-#head(fff)
-
-#output table; this is Table S1
-#write.table(sum1, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
-
-
-
-
-
-
-
-
-#####################################
-#calculate % human by ecoregion for just top 10% largest fires
-#use this to make Figure 1 
-
-#summary statistics on each subset (human and lightning)
-#human subset of large fires only
-#head(keep)
-#outputh=NULL
-
-#for (i in tt33) {
-  #subh<-keep[keep$IGNITION=="Human",]
-  #subbyh<-subh[subh$ecn==i,]
-  #ninetyh<-subset(subbyh, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
-  #outtyh<- c(i,length(ninetyh$FIRE_SIZE_ha),mean(ninetyh$FIRE_SIZE_ha),sd(ninetyh$FIRE_SIZE_ha),median(ninetyh$FIRE_SIZE_ha),sum(ninetyh$FIRE_SIZE_ha))
-  #outputh<-rbind(outputh,outtyh)
-#}
-
-#colnames(outputh) <- c("ecn", "hnobs", "hmean","hsd","hmedian","hsum")
-#row.names(outputh)<-NULL
-#head(outputh)
-
-#summary(hmean)
-
-#lightning subset of large fires only
-#outputl=NULL
-
-#for (i in tt33) {
-  #subl<-keep[keep$IGNITION=="Lightning",]
-  #subbyl<-subl[subl$ecn==i,]
-  #ninetyl<-subset(subbyl, FIRE_SIZE_ha >= quantile(FIRE_SIZE_ha, 0.9))
-  #outtyl<- c(i,length(ninetyl$FIRE_SIZE_ha),mean(ninetyl$FIRE_SIZE_ha),sd(ninetyl$FIRE_SIZE_ha),median(ninetyl$FIRE_SIZE_ha),sum(ninetyl$FIRE_SIZE_ha))
-  #outputl<-rbind(outputl,outtyl)
-#}
-
-#colnames(outputl) <- c("ecn", "lnobs", "lmean","lsd","lmedian","lsum")
-#row.names(outputl)<-NULL
-#head(outputl)
-
-
-#merge two dataframes together
-#output2<-merge(outputh,outputl,by="ecn")
-
-#calculate the total number of fires of all ignitions
-#output2$totfires<-output2$hnobs+output2$lnobs
-#output2
-
-#calculate the percent of human ignitions by ecoregion
-#output2$perh<-output2$hnobs/output2$totfires*100
-
-#put NA_L3CODE back in to join easily in Arc
-#tt9<-unique(subz[c("ecn", "NA_L3CODE")])
-#jjj<-left_join(output2,tt9,by="ecn")
-#jjj
-#output table; used to make Figure 1
-#write.table(jjj, "results/firehasum_ecn_top_ten_Short_update_hl.csv", sep=",", row.names=FALSE, append=FALSE)
-
-#what is the range of percent human started fires by ecoregion?
-#summary(jjj$perh)
-#min=12.50
-#max=100.00
-
-
-################################################
-# fire season, large fires, all ecoregions
-#cannot use 'output' from above because this one keeps different columns (summary columns)... this one also takes longer to run
-#I believe that output3 is the same as outputy...try using outputy
-#output3=NULL
-
-#for(i in tt3) {
-  #subby<-subz[subz$ecn==i,]
-  #ninety<-subset(subby, ha >= quantile(ha, 0.9))
-  #outty<-ninety[,]
-  #output3<-rbind(output3,outty)
-#}
-
-#do I need these 6 lines of code below?
-#eco.legend <- data.frame(ec = unique(outputy$NA_L3CODE), ed = unique(outputy$NA_L3NAME))
-#eco.legend$ec2<-as.character(eco.legend$ec)
-#eco.legend$ec3<-gsub("\\.", "", (eco.legend$ec2))
-#eco.legend$ecn<-as.numeric(eco.legend$ec3)
-#eco.legend <- subset(eco.legend, eco.legend$ecn != 000 & is.na(eco.legend$ecn) == FALSE)
-#eco.legend <- eco.legend[order(eco.legend$ecn),]
-
-head(keep)
 r3 <- summaryBy(clean_id~DISCOVERY_DOY+IGNITION, data=keep, FUN=length)
 
 # fire season of large fires, for all ecoregions
@@ -195,6 +50,8 @@ yyy<-rowSums(r2m[,])
 head(yyy)
 142276+32946
 #175222
+
+
 ################################################
 #median day of year for large human and lightning fires
 r4 <- summaryBy(DISCOVERY_DOY~IGNITION, data=keep, FUN=median)

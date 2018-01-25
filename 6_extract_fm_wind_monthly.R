@@ -18,22 +18,6 @@ head(lrg_fires)
 
 lrgbyyear<-summaryBy(clean_id~DISCOVERY_YEAR,data=lrg_fires,FUN=c(length))
 
-#the format of NA_L3CODE is formatted incorrectly, so remove that field
-#read$NA_L3CODE<-NULL
-
-#bring in something else that can make key from
-#readz<- read.csv("data/fire/Short_large10.csv")
-
-#create the key
-#key<-unique(readz[c("NA_L3CODE","NA_L3NAME")])
-
-#joinz<-left_join(read,key,by=c('NA_L3NAME'))
-#head(joinz)
-#this now has a correct field for NA_L3CODE
-
-#tt3<-unique(joinz$NA_L3CODE)
-#tt3<-unique(joinz$NA_L3CODE)
-
 #subset just large human or just large lightning fires
 summary(lrg_fires$STAT_CAUSE_DESCR)
 15414/190636*100
@@ -89,7 +73,7 @@ lrg_fires_rr<-left_join(keep,region,by="NA_L3CODE")
 eastlrg<-lrg_fires_rr[which(lrg_fires_rr$region=="east"),]
 westlrg<-lrg_fires_rr[which(lrg_fires_rr$region=="west"),]
 
-#bring in fire size data by ecoregion (made below, line 236)
+#bring in fire size data by ecoregion (made below, line 260)
 fireha<-as.data.frame(read.csv("results/firehasum_ecn_top_ten_Short_update.csv"))
 #fireha$ecn<-as.numeric(gsub("[.]","",fireha$NA_L3CODE))
 head(fireha)
@@ -275,11 +259,6 @@ sum11<-left_join(sum1,key11,by=c('NA_L3NAME'))
 head(sum11)
 write.table(sum11, "results/firehasum_ecn_top_ten_Short_update.csv", sep=",", row.names=FALSE, append=FALSE)
 
-#summary of mean fire size by ignition and ecoregion
-#sum2<-summaryBy(data=keep, FIRE_SIZE_ha~IGNITION+NA_L3NAME, FUN=c(mean))
-
-#tranform this to wide, then do paired t=test
-#w<-reshape(sum2,timevar="ig",idvar="NA_L3NAME",v.names="ha.mean",direction="wide")
 
 sum2a<-summaryBy(data=keep, FIRE_SIZE_ha~NA_L3CODE+IGNITION, FUN=c(length))
 sum2a
@@ -327,13 +306,7 @@ summary(zzz$hameanl)
 sum66<-summaryBy(data=keep, FIRE_SIZE_ha~IGNITION+NA_L3CODE, FUN=c(sum))
 w66<-reshape(sum66,timevar="IGNITION",idvar="NA_L3CODE",v.names="FIRE_SIZE_ha.sum",direction="wide")
 
-#don't use the EcoArea_km2 field
-#keyea<-unique(keep[c("NA_L3CODE","EcoArea_km2")])
 
-#w66ea<-left_join(w66,keyea,by="NA_L3CODE")
-#head(w66ea)
-
-#w66ea$barat<-w66ea$FIRE_SIZE_ha.sum.Human/w66ea$EcoArea_km2
 write.table(w66, "results/burned_area_hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
@@ -371,21 +344,6 @@ std.error(lub$Wind, na.rm=TRUE)
 #0.00343
 
 
-#stats for standard deviation of wind speed
-#not reported in manuscript
-#mean(hub$stdwind_m)
-#1.479
-#median(hub$stdwind_m)
-#1.514
-#mean(lub$stdwind_m)
-#1.1658
-#median(lub$stdwind_m)
-#1.12958
-
-#std.error(hub$stdwind_m)
-#0.000996
-#std.error(lub$stdwind_m)
-#0.00172
 
 
 #t-test of mean fuel moisture data by ignition type
@@ -396,9 +354,7 @@ t.test(keep$fm~keep$IGNITION,var.equal = TRUE)
 t.test(keep$Wind~keep$IGNITION,var.equal = TRUE)
 #p=<2.2e-16
 
-#t-test of mean wind speed standard deviation by ignition type
-#t.test(keep$stdwind_m~keep$ig,var.equal = TRUE)
-#p=<2.2e-16
+
 
 
 
@@ -487,39 +443,6 @@ wwszzz<-left_join(wws,keyzzz,by=c('NA_L3CODE'))
 
 write.table(wwszzz, "results/diff_wind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
 #this data was added to shapefile in Arc
-
-
-#to calculate the difference in the standard deviation of wind speed: human vs. lightning
-#standard deviation of wind speed; not reported in manuscript
-#r4 <- summaryBy(stdwind_m~ig+NA_L3CODE, data=keep, FUN=mean)
-#wwssd<-cast(r4, NA_L3CODE ~ ig, value = 'stdwind_m.mean')
-#wwssd$diff_sdwindspeed<-w$human-w$lightning
-#write.table(wwssd, "/Users/rana7082/Dropbox/ecoregions/derived/diff_sdwind_NA_L3CODE_10_monthly.csv", sep=",", row.names=FALSE, append=FALSE)
-
-
-###
-#summary of fire size by ecoregion and ignition
-#sum66<-as.data.frame(summaryBy(FIRE_SIZE_ha~NA_L3CODE+IGNITION,data=keep, FUN=mean))
-#wid<-cast(sum66, NA_L3CODE ~ IGNITION, value = 'FIRE_SIZE_ha.mean')
-#write.table(wid, "results/fireha_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
-
-#summary of number fire events by ecoregion and ignition
-#sum77<-as.data.frame(summaryBy(clean_id~NA_L3CODE+IGNITION,data=keep,FUN=length))
-#wider<-cast(sum77, NA_L3CODE ~ IGNITION, value = 'clean_id.length')
-#head(wider)
-#write.table(wider, "results/nobs_10_hl.csv", sep=",", row.names=FALSE, append=FALSE)
-
-#summary of fire size by ecoregion only
-#uuu<-as.data.frame(summaryBy(ha~NA_L3CODE,data=keep, FUN=mean))
-#write.table(uuu, "/Users/rana7082/Dropbox/ecoregions/derived/fireha_10.csv", sep=",", row.names=FALSE, append=FALSE)
-
-
-###
-#stats with median
-#tti2<-summaryBy(data=keep, ha~ig+NA_L3CODE, FUN=median)
-#df2<-as.data.frame(tti2)
-#w2 <- reshape(df2, timevar = "ig", idvar = "NA_L3CODE", v.names = "ha.median", direction = "wide")
-#write.table(w2, "C:/Users/rnagy/Dropbox/ecoregions/derived/firehamed_10hl.csv", sep=",", row.names=FALSE, append=FALSE)
 
 
 

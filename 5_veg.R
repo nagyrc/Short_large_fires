@@ -19,7 +19,7 @@ head(keep)
 biostats<-summaryBy(NBCD_countrywide_biomass_mosaic~NA_L3CODE,data=keep,FUN=c(mean),na.rm=TRUE)
 
 #join table of fire size and biomass by ecoregion
-#bring in fire size data by ecoregion (made in script 6, line 236)
+#bring in fire size data by ecoregion (made in script 6, line 260)
 fireha<-as.data.frame(read.csv("results/firehasum_ecn_top_ten_Short_update.csv"))
 dfbio<-left_join(biostats,fireha,by="NA_L3CODE")
 
@@ -29,9 +29,7 @@ colnames(dfbio) <- c("NA_L3CODE", "bio.mean","NA_L3NAME","nobs", "ha.mean","ha.s
 #remove unused columns
 dfbio<- subset(dfbio, select=-c(nobs,ha.sd,ha.median,ha.min,ha.max))
 
-#bring in Level I info
-#levels <- read.csv("C:/Users/rnagy/Dropbox/ecoregions/data/NA_CEC_Eco_Level3/NA_CEC_Eco_Level3.csv")
-#head(levels)
+#bring in Level I ecoregion info
 key<-unique(keep[c("NA_L3CODE","NA_L1CODE")])
 key
 dfbio1<-left_join(dfbio,key,by=c('NA_L3CODE'))
