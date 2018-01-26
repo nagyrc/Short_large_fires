@@ -31,7 +31,7 @@ diff_fm_NA_L3CODE_10_monthly.csv: this is calculating the difference in mean mon
 
 diff_wind_NA_L3CODE_10_monthly.csv: this is calculating the difference in mean monthly wind speed between large human and lightning-caused fires within an ecoregion; fields in this dataset include: NA_L3CODE= the level 3 ecoregion code from the CEC; Human= mean monthly wind speed (m/s) for large human-caused fires; Lightning= mean monthly wind speed (m/s) for large lightning-caused fires; diff_windspeed= the difference in wind speed between large human minus large lightning-caused fires within an ecoregion; NA_L3NAME= the level 3 ecoregion name from CEC
 
-firehasum_ecn_top_ten_Short_update.csv
+firehasum_ecn_top_ten_Short_update.csv: this file includes summary statistics for the large fires by ecoregion; fields in this dataset include: NA_L3NAME= the level 3 ecoregion code from the CEC; FIRE_SIZE_ha.length= number of large fires by ecoregion; FIRE_SIZE_ha.mean= mean large fire size by ecoregion; FIRE_SIZE_ha.sd= standard deviation of large fire size by ecoregion; FIRE_SIZE_ha.median= median large fire size by ecoregion; FIRE_SIZE_ha.min= minimum large fire size by ecoregion; FIRE_SIZE_ha.max= maximum large fire size by ecoregion; NA_L1NAME= the level 1 ecoregion name from the CEC; NA_L3CODE= the level 3 ecoregion code from the CEC
 
 firestats_ecn_top_ten_Short_update_hl.csv
 
