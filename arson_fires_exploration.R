@@ -25,65 +25,49 @@ summary(lrg_fires$STAT_CAUSE_DESCR)
 
 
 ###########################
+#subset just the arson fires
 arson <- lrg_fires %>%
   filter(STAT_CAUSE_DESCR=="Arson") 
+#keep has 42266 fires
 
-#%>%
-  #group_by(DISCOVERY_DOY) %>%
-  #summarise(n_fires = n(),
-            #mean_size = mean(FIRE_SIZE_ha))
-
+#number of and mean size of arson fires by day of year
 arson_doy <- arson %>%
   group_by(DISCOVERY_DOY) %>%
   summarise(n_fires = n(),
             mean_size = mean(FIRE_SIZE_ha))
 
+#this is cool; most Arson fires in Feb-Mar
 arson_doy %>%
   ggplot() +
   geom_bar(aes(x = DISCOVERY_DOY,  y = n_fires), stat = "identity")
+
+#not super informative
+arson_doy %>%
+  ggplot() +
+  geom_bar(aes(x = DISCOVERY_DOY,  y = mean_size), stat = "identity")
+
+
+
 ###########################
-
-#subset just the arson fires
-arson<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR=="Arson"),]
-#keep has 42266 fires
-head(arson)
-
-#number of arson fires by DOY
-r3333 <- summaryBy(clean_id~DISCOVERY_DOY, data=arson, FUN=length)
-r3333
-
-plot(x=r3333$DISCOVERY_DOY, y=r3333$clean_id.length)
-
-#number of arson fires by ecoregion
-r4444 <- summaryBy(clean_id~NA_L3CODE, data=arson, FUN=length)
-r4444
-
-r7777 <- summaryBy(clean_id~NA_L3CODE+NA_L3NAME, data=arson, FUN=length)
-r7777
-
-#remove row numbers
-#row.names(r7777) <- NULL
+#number of and mean size of arson fires by ecoregion
+arson_eco <- arson %>%
+  group_by(NA_L3CODE) %>%
+  summarise(n_fires = n(),
+            mean_size = mean(FIRE_SIZE_ha))
 
 #then order
-r7777o <-orderBy(~clean_id.length,r7777)
-r7777o
+arson_ecoo <-orderBy(~n_fires,arson_eco)
+arson_ecoo
+###########################
 
-#mean size of arson fires by DOY 
-r5555 <- summaryBy(FIRE_SIZE_ha~DISCOVERY_DOY, data=arson, FUN=mean)
-r5555
 
-plot(x=r5555$DISCOVERY_DOY, y=r5555$FIRE_SIZE_ha.mean)
-
-#mean size of arson fires by ecoregion
-r6666 <- summaryBy(FIRE_SIZE_ha~NA_L3CODE, data=arson, FUN=mean)
-r6666
-
-# Import the Level 3 Ecoregions
+# Import the Level 3 Ecoregions to plot
 
 # set projections
 #EPSG:102003 USA_Contiguous_Albers_Equal_Area_Conic
 proj_ea <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
+#bring in ecoregion data
 eco = paste0("data/raw/us_eco_l3")
 ecoreg <- st_read(dsn = eco, layer = "us_eco_l3", quiet= TRUE) %>%
   st_transform(., proj_ea) %>%
@@ -92,14 +76,10 @@ ecoreg <- st_read(dsn = eco, layer = "us_eco_l3", quiet= TRUE) %>%
          EcoArea_km2 = area_m2/1000000)
 
 #plot mean fire size and number of fires by ecoregion
-colnames(r6666)[2] <- "arson_fire_size_ha"
-ecoreg_arson1 <- left_join(ecoreg,r6666, by="NA_L3CODE")
+ecoreg_arson <- left_join(ecoreg,arson_eco, by="NA_L3CODE")
 
-colnames(r4444)[2] <- "num_arson_fires"
-ecoreg_arson2 <- left_join(ecoreg_arson1,r4444, by="NA_L3CODE")
+head(ecoreg_arson)
 
-head(ecoreg_arson2)
-
-plot(ecoreg_arson2["num_arson_fires"])
-plot(ecoreg_arson2["arson_fire_size_ha"])
+plot(ecoreg_arson["n_fires"])
+plot(ecoreg_arson["mean_size"])
 
