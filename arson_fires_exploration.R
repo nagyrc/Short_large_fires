@@ -23,6 +23,26 @@ lrg_fires$FIRE_SIZE_ha<-lrg_fires$FIRE_SIZE_m2*0.0001
 summary(lrg_fires$STAT_CAUSE_DESCR)
 #Arson =42266 fires
 
+
+###########################
+arson <- lrg_fires %>%
+  filter(STAT_CAUSE_DESCR=="Arson") 
+
+#%>%
+  #group_by(DISCOVERY_DOY) %>%
+  #summarise(n_fires = n(),
+            #mean_size = mean(FIRE_SIZE_ha))
+
+arson_doy <- arson %>%
+  group_by(DISCOVERY_DOY) %>%
+  summarise(n_fires = n(),
+            mean_size = mean(FIRE_SIZE_ha))
+
+arson_doy %>%
+  ggplot() +
+  geom_bar(aes(x = DISCOVERY_DOY,  y = n_fires), stat = "identity")
+###########################
+
 #subset just the arson fires
 arson<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR=="Arson"),]
 #keep has 42266 fires
