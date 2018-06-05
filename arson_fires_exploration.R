@@ -38,6 +38,16 @@ plot(x=r3333$DISCOVERY_DOY, y=r3333$clean_id.length)
 r4444 <- summaryBy(clean_id~NA_L3CODE, data=arson, FUN=length)
 r4444
 
+r7777 <- summaryBy(clean_id~NA_L3CODE+NA_L3NAME, data=arson, FUN=length)
+r7777
+
+#remove row numbers
+#row.names(r7777) <- NULL
+
+#then order
+r7777o <-orderBy(~clean_id.length,r7777)
+r7777o
+
 #mean size of arson fires by DOY 
 r5555 <- summaryBy(FIRE_SIZE_ha~DISCOVERY_DOY, data=arson, FUN=mean)
 r5555
