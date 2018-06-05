@@ -1,25 +1,29 @@
 #this code is part of the Short_large_fires project by Dr. R. Chelsea Nagy
 #Arson exploration
 
+library(sf)
+library(doBy)
+library(tidyverse)
 
 #open large fires
 lrg_fires<- read.csv("data/merged/lrg_fires.csv")
 head(lrg_fires)
 
 #make new column of ecoregion number to easily index
-lrg_fires$ecn<-as.character(gsub("\\.","",lrg_fires$NA_L3CODE))
-lrg_fires$ecn<-as.numeric(lrg_fires$ecn)
-head(lrg_fires)
+#lrg_fires$ecn<-as.character(gsub("\\.","",lrg_fires$NA_L3CODE))
+#lrg_fires$ecn<-as.numeric(lrg_fires$ecn)
+#head(lrg_fires)
+
+#tt3333<-unique(lrg_fires$ecn)
 
 #update FIRE_SIZE_ha here
 lrg_fires$FIRE_SIZE_ha<-lrg_fires$FIRE_SIZE_m2*0.0001
 
-how many fires are caused by Arson?
+#how many fires are caused by Arson?
 summary(lrg_fires$STAT_CAUSE_DESCR)
 #Arson =42266 fires
 
-tt3333<-unique(lrg_fires$ecn)
-
+#subset just the arson fires
 arson<-lrg_fires[which(lrg_fires$STAT_CAUSE_DESCR=="Arson"),]
 #keep has 42266 fires
 head(arson)
@@ -66,5 +70,5 @@ ecoreg_arson2 <- left_join(ecoreg_arson1,r4444, by="NA_L3CODE")
 
 head(ecoreg_arson2)
 
-plot(ecoreg[16])
+plot(ecoreg[2])
 plot(ecoreg[17])
