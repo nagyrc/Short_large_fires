@@ -42,3 +42,29 @@ plot(x=r5555$DISCOVERY_DOY, y=r5555$FIRE_SIZE_ha.mean)
 
 #mean size of arson fires by ecoregion
 r6666 <- summaryBy(FIRE_SIZE_ha~NA_L3CODE, data=arson, FUN=mean)
+r6666
+
+# Import the Level 3 Ecoregions
+
+# set projections
+#EPSG:102003 USA_Contiguous_Albers_Equal_Area_Conic
+proj_ea <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
+
+eco = paste0("data/raw/us_eco_l3")
+ecoreg <- st_read(dsn = eco, layer = "us_eco_l3", quiet= TRUE) %>%
+  st_transform(., proj_ea) %>%
+  st_simplify(., preserveTopology = TRUE, dTolerance = 1000) %>%
+  mutate(area_m2 = as.numeric(st_area(geometry)),
+         EcoArea_km2 = area_m2/1000000)
+
+#plot mean fire size and number of fires by ecoregion
+colnames(r6666)[2] <- "arson_fire_size_ha"
+ecoreg_arson1 <- left_join(ecoreg,r6666, by="NA_L3CODE")
+
+colnames(r4444)[2] <- "num_arson_fires"
+ecoreg_arson2 <- left_join(ecoreg_arson1,r4444, by="NA_L3CODE")
+
+head(ecoreg_arson2)
+
+plot(ecoreg[16])
+plot(ecoreg[17])
