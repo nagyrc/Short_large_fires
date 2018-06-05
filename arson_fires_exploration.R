@@ -70,5 +70,6 @@ ecoreg_arson2 <- left_join(ecoreg_arson1,r4444, by="NA_L3CODE")
 
 head(ecoreg_arson2)
 
-plot(ecoreg[2])
-plot(ecoreg[17])
+plot(ecoreg_arson2["num_arson_fires"])
+plot(ecoreg_arson2["arson_fire_size_ha"])
+
