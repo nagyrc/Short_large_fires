@@ -50,8 +50,9 @@ arson_doy %>%
 #number of and mean size of arson fires by year
 arson_yr <- arson %>%
   group_by(DISCOVERY_YEAR) %>%
-  summarise(n_fires = n(), mean_size = mean(FIRE_SIZE_ha),
-            arrange(desc(n_fires)))
+  summarise(n_fires = n(), 
+            mean_size = mean(FIRE_SIZE_ha)) %>%
+            arrange(desc(n_fires))
 
 arson_yr
 
@@ -60,11 +61,10 @@ arson_yr
 arson_eco <- arson %>%
   group_by(NA_L3CODE) %>%
   summarise(n_fires = n(),
-            mean_size = mean(FIRE_SIZE_ha))
+            mean_size = mean(FIRE_SIZE_ha)) %>%
+            arrange(desc(n_fires))
 
-#then order
-arson_ecoo <-orderBy(~n_fires,arson_eco)
-arson_ecoo
+arson_eco
 ###########################
 
 
