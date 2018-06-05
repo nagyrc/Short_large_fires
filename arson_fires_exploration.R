@@ -47,6 +47,13 @@ arson_doy %>%
   geom_bar(aes(x = DISCOVERY_DOY,  y = mean_size), stat = "identity")
 
 
+#number of and mean size of arson fires by year
+arson_yr <- arson %>%
+  group_by(DISCOVERY_YEAR) %>%
+  summarise(n_fires = n(), mean_size = mean(FIRE_SIZE_ha),
+            arrange(desc(n_fires)))
+
+arson_yr
 
 ###########################
 #number of and mean size of arson fires by ecoregion
